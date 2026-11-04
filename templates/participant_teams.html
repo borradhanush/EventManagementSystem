@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}
+  Participant teams · {{ program.program_name }}
+{% endblock %}
+{% block content %}
+  <section class="welcome">
+    <p class="eyebrow">{{ program.event_name }} · {{ program.program_name }}</p>
+    <h1>Participant teams</h1>
+    <p>Configured maximum team size: {{ program.team_size }}.</p>
+  </section>
+  <section class="card wide participant-teams-card">
+    {% if not formation_open %}
+      <p class="notice">Team creation and member additions are closed because the program is cancelled or its registration deadline has passed.</p>
+    {% endif %}
+    {% if can_create %}
+      <form method="post" action="{{ url_for('create_participant_team', program_id=program.id) }}">
+        <button type="submit">Create a team and become its captain</button>
+      </form>
+    {% elif my_team_id %}
+      <p>You already belong to a team for this program.</p>
+    {% endif %}
+    {% if teams %}
+      <div class="participant-team-list">
+        {% for team, members in teams %}
+          <article class="participant-team-card">
+            <header>
+              <h2>{{ team.captain_name }}’s team</h2>
+              <span>{{ team.member_count }} / {{ program.team_size }} members</span>
+            </header>
+            <ul>
+              {% for member in members %}
+                <li>{{ member.full_name }}
+                  {% if member.is_captain %}
+                    <strong>(Captain)</strong>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+            {% if team.viewer_is_member %}
+              <a class="button secondary" href="{{ url_for('participant_team_detail', team_id=team.id) }}">View my team</a>
+            {% endif %}
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="empty-state">No participant teams have been created for this program yet.</p>
+    {% endif %}
+    <p class="foot">
+      <a href="{{ url_for('program_detail', program_id=program.id) }}">Back to program</a>
+    </p>
+  </section>
+{% endblock %}

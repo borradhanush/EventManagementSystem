@@ -1,0 +1,193 @@
+.program-management {
+    margin-top: 28px;
+    padding-top: 22px;
+    border-top: 1px solid #e8ebf2
+}
+.program-list {
+    display: grid;
+    gap: 14px;
+    margin: 20px 0
+}
+.program-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 18px;
+    border: 1px solid #e4e8f1;
+    border-radius: 10px;
+    background: #fafbfe
+}
+.program-card h3 {
+    margin: 4px 0
+}
+.program-card p {
+    margin: 6px 0
+}
+.program-form-card {
+    max-width: 760px!important;
+    margin: 0 auto!important
+}
+.program-host-form {
+    display: grid;
+    gap: 14px;
+    margin-top: 12px;
+    padding: 18px;
+    background: #f7f8fb;
+    border-radius: 10px
+}
+.program-host-list {
+    list-style: none;
+    padding: 0;
+    margin: 14px 0
+}
+.program-host-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid #e9edf4
+}
+.program-host-list form,.program-actions form {
+    margin: 0
+}
+.program-facts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 20px
+}
+.program-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 22px
+}
+.program-actions .button {
+    margin: 0
+}
+
+/* Program detail presentation */
+.program-detail-page {
+    width: min(1040px, 100%);
+    margin: 0 auto;
+    padding: 32px 0 64px;
+    color: var(--color-text, #111827);
+    font-family: var(--font-sans, Inter, system-ui, sans-serif);
+}
+.program-detail-page * { box-sizing: border-box; }
+.program-detail-page .program-detail-header { margin-bottom: 24px; }
+.program-detail-page .program-detail-breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    color: var(--color-text-muted, #6B7280);
+    font-size: 14px;
+}
+.program-detail-page .program-detail-breadcrumb a { color: inherit; text-decoration: none; }
+.program-detail-page .program-detail-breadcrumb a:hover { color: var(--color-primary, #4F46E5); text-decoration: underline; }
+.program-detail-page .program-detail-header-main { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+.program-detail-page .visually-hidden { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.program-detail-page .program-detail-heading-copy { min-width: 0; }
+.program-detail-page .program-event-eyebrow { margin: 0 0 8px; color: var(--color-text-muted, #6B7280); font-size: 13px; font-weight: 600; }
+.program-detail-page .program-detail-title-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.program-detail-page .program-detail-title-row h1 { margin: 0 8px 0 0; color: var(--color-text, #111827); font-size: 32px; line-height: 1.2; font-weight: 700; }
+.program-detail-page .program-category-pill, .program-detail-page .program-mode-pill { display: inline-flex; min-height: 26px; align-items: center; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+.program-detail-page .program-category-pill { border: 1px solid #C7D2FE; background: #EEF2FF; color: #3730A3; }
+.program-detail-page .program-mode-pill { border: 1px solid #D1D5DB; background: #fff; color: #374151; }
+.program-detail-page .program-detail-subtitle { margin: 10px 0 0; color: var(--color-text-muted, #6B7280); font-size: 15px; }
+.program-detail-page .program-detail-back { flex: 0 0 auto; text-decoration: none; }
+.program-detail-page .program-detail-back svg, .program-detail-page .program-detail-icon-tile svg, .program-detail-page .program-fact-icon svg, .program-detail-page .program-registration-icon svg, .program-detail-page .program-register-button svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.program-detail-page .program-detail-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; align-items: start; gap: 24px; }
+.program-detail-page .program-detail-main { display: grid; min-width: 0; gap: 24px; grid-area: auto; }
+.program-detail-page .program-detail-sidebar { position: sticky; top: 88px; display: grid; gap: 20px; grid-area: auto; }
+.program-detail-page .program-detail-card { width: 100%; max-width: none; margin: 0; padding: 24px; border-radius: var(--radius-lg, 14px); box-shadow: var(--shadow-card); animation: program-detail-fade-in 250ms ease both; animation-delay: calc(var(--stagger, 0) * 40ms); }
+.program-detail-page .program-detail-card-heading, .program-detail-page .program-registration-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.program-detail-page .program-detail-card-heading h2, .program-detail-page .program-registration-heading h2 { margin: 0; color: #111827; font-size: 18px; line-height: 1.35; font-weight: 600; }
+.program-detail-page .program-detail-icon-tile, .program-detail-page .program-registration-icon { display: inline-flex; width: 40px; height: 40px; flex: 0 0 40px; align-items: center; justify-content: center; border-radius: 12px; background: #EEF2FF; color: #4338CA; }
+.program-detail-page .program-about-description { margin: 0; color: #374151; font-size: 15px; line-height: 1.7; }
+.program-detail-page .program-about-label { margin: 0 0 4px; color: #6B7280; font-size: 13px; font-weight: 600; }
+.program-detail-page .program-about-description.is-empty { color: #6B7280; font-style: italic; }
+.program-detail-page .program-host-list { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.program-detail-page .program-host-list li.program-host-row { display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 14px 0; border-bottom: 1px solid #E5E7EB; }
+.program-detail-page .program-host-list li.program-host-row:first-child { padding-top: 0; }
+.program-detail-page .program-host-list li.program-host-row:last-child { padding-bottom: 0; border-bottom: 0; }
+.program-detail-page .program-host-avatar { display: inline-flex; width: 42px; height: 42px; flex: 0 0 42px; align-items: center; justify-content: center; border-radius: 50%; background: #EEF2FF; color: #3730A3; font-size: 14px; font-weight: 700; }
+.program-detail-page .program-host-copy { display: flex; min-width: 0; flex: 1; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.program-detail-page .program-host-name { color: #111827; font-size: 15px; font-weight: 600; }
+.program-detail-page .program-host-role { padding: 3px 8px; border-radius: 999px; background: #F3F4F6; color: #374151; font-size: 11px; font-weight: 600; }
+.program-detail-page .program-host-email { flex-basis: 100%; color: #6B7280; font-size: 13px; overflow-wrap: anywhere; }
+.program-detail-page .program-host-row form { margin-left: auto; }
+.program-detail-page .program-host-row form button, .program-detail-page .program-host-form button, .program-detail-page .program-actions .button, .program-detail-page .program-actions button { min-height: 40px; border-radius: 8px; }
+.program-detail-page .program-host-form { margin-top: 20px; padding: 18px; border: 1px solid #E5E7EB; border-radius: 12px; background: #F9FAFB; }
+.program-detail-page .program-host-form h2 { margin: 0 0 14px; font-size: 16px; }
+.program-detail-page .program-host-form .stack { display: grid; gap: 12px; }
+.program-detail-page .program-host-form label { display: grid; gap: 6px; color: #374151; font-size: 13px; font-weight: 600; }
+.program-detail-page .program-host-form input, .program-detail-page .program-host-form select { min-height: 44px; width: 100%; padding: 10px 12px; border: 1px solid #D1D5DB; border-radius: 8px; background: #fff; font: inherit; }
+.program-detail-page .program-key-facts-card { grid-area: auto; }
+.program-detail-page .program-key-facts { display: grid; }
+.program-detail-page .program-key-fact { display: grid; grid-template-columns: 36px minmax(0, 1fr); align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid #E5E7EB; }
+.program-detail-page .program-key-fact:first-child { padding-top: 0; }
+.program-detail-page .program-key-fact:last-child { padding-bottom: 0; border-bottom: 0; }
+.program-detail-page .program-fact-icon { display: inline-flex; width: 36px; height: 36px; align-items: center; justify-content: center; border-radius: 10px; background: #EEF2FF; color: #4338CA; }
+.program-detail-page .program-fact-icon svg { width: 18px; height: 18px; }
+.program-detail-page .program-fact-label, .program-detail-page .program-fact-value { display: block; }
+.program-detail-page .program-fact-label { margin-bottom: 3px; color: #6B7280; font-size: 13px; font-weight: 600; }
+.program-detail-page .program-fact-value { color: #111827; font-size: 15px; font-weight: 500; line-height: 1.45; overflow-wrap: anywhere; }
+.program-detail-page .program-registration-panel { grid-area: auto; width: 100%; max-width: none; margin: 0; padding: 24px; border: 1px solid #C7D2FE; border-radius: 14px; background: #EEF2FF; animation: program-detail-fade-in 250ms ease both; animation-delay: 120ms; }
+.program-detail-page .program-registration-heading { margin-bottom: 12px; }
+.program-detail-page .program-registration-panel p { margin: 0 0 14px; color: #374151; font-size: 14px; line-height: 1.55; }
+.program-detail-page .program-registration-closes { color: #6B7280 !important; font-size: 13px !important; }
+.program-detail-page .program-registration-panel .ui-btn { text-decoration: none; }
+.program-detail-page .program-registration-panel .program-register-button { display: flex; width: 100%; min-height: 44px; justify-content: space-between; }
+.program-detail-page .program-registration-panel .ui-btn--secondary { margin-right: 8px; }
+.program-detail-page .program-registration-panel.is-registered { border-color: #A7F3D0; background: #ECFDF5; }
+.program-detail-page .program-registration-panel.is-registered .program-registration-icon { background: #D1FAE5; color: #047857; }
+.program-detail-page .program-registration-panel.is-closed { border-color: #D1D5DB; background: #F3F4F6; }
+.program-detail-page .program-registration-panel.is-closed .program-registration-icon { background: #E5E7EB; color: #374151; }
+.program-detail-page .program-registration-panel.is-closed .program-registration-heading p { margin: 0; }
+.program-detail-page .program-actions { flex-wrap: wrap; }
+.program-detail-page .program-actions .button { display: inline-flex; align-items: center; padding: 10px 16px; background: #4F46E5; color: #fff; font-weight: 600; text-decoration: none; }
+.program-detail-page .program-actions .button:hover { background: #4338CA; }
+.program-detail-page :focus-visible { outline: 3px solid rgba(79,70,229,.4); outline-offset: 2px; }
+@keyframes program-detail-fade-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 1100px) {
+    .program-detail-page { width: min(1040px, calc(100% - 40px)); }
+}
+@media (max-width: 900px) {
+    .program-detail-page .program-detail-grid { grid-template-columns: minmax(0, 1fr); grid-template-areas: "registration" "main" "facts"; }
+    .program-detail-page .program-detail-main { grid-area: main; }
+    .program-detail-page .program-detail-sidebar { position: static; display: contents; }
+    .program-detail-page .program-key-facts-card { grid-area: facts; }
+    .program-detail-page .program-registration-panel { grid-area: registration; }
+}
+@media (max-width: 639px) {
+    .program-detail-page { width: calc(100% - 32px); padding-top: 24px; }
+    .program-detail-page .program-detail-header-main { flex-direction: column; }
+    .program-detail-page .program-detail-title-row h1 { flex-basis: 100%; font-size: 28px; }
+    .program-detail-page .program-detail-back { width: 100%; }
+    .program-detail-page .program-detail-card, .program-detail-page .program-registration-panel { padding: 20px; }
+    .program-detail-page .program-key-fact { grid-template-columns: 36px minmax(0, 1fr); }
+    .program-detail-page .program-host-list li.program-host-row { align-items: flex-start; flex-wrap: wrap; }
+    .program-detail-page .program-host-row form { margin-left: auto; }
+    .program-detail-page .program-registration-panel .ui-btn--secondary { margin: 0 0 8px; }
+    .program-detail-page .program-registration-panel.is-registered .ui-btn { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .program-detail-page .program-detail-card, .program-detail-page .program-registration-panel { animation: none; }
+}
+@media(max-width:680px) {
+    .program-card,.program-host-list li {
+        align-items: flex-start;
+        flex-direction: column
+    }
+    .program-facts {
+        grid-template-columns: 1fr
+    }
+    .program-actions {
+        align-items: flex-start;
+        flex-direction: column
+    }
+}

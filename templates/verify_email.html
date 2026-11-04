@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}
+  Verify email
+{% endblock %}
+{% block content %}
+  <div class="verification-layout">
+    <aside class="verification-brand-panel" aria-labelledby="verification-brand-heading">
+      <h2 id="verification-brand-heading">Almost there!</h2>
+      <p>Verify your email to activate your account and start joining events.</p>
+      <ol class="verification-steps" aria-label="Account setup progress">
+        <li class="completed">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="10" fill="#4057c8" stroke="#4057c8"></circle>
+            <path d="m6.5 12.2 3.6 3.5 7.5-7.4" fill="none" stroke="#fff" stroke-width="2.4"></path>
+          </svg>
+          <span>Create your account</span>
+        </li>
+        <li class="current" aria-current="step">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="9" fill="#4057c8"></circle>
+            <path d="M12 7v5l3 2" stroke="#fff"></path>
+          </svg>
+          <span>Verify your email</span>
+        </li>
+        <li class="upcoming">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M5 12h14m-5-5 5 5-5 5"></path>
+          </svg>
+          <span>Start exploring events</span>
+        </li>
+      </ol>
+    </aside>
+    <section class="card email-verification-card verification-card">
+      <div class="verification-mail-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+          <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+          <path d="m4 7 8 6 8-6"></path>
+        </svg>
+      </div>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div class="verification-flash {{ category }}" role="status">
+            {% if category == 'success' %}
+              <svg class="verification-flash-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="m5 12.5 4.2 4.2L19 7"></path>
+              </svg>
+            {% elif category == 'error' %}
+              <svg class="verification-flash-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <circle cx="12" cy="12" r="9"></circle>
+                <path d="M12 7v6m0 4h.01"></path>
+              </svg>
+            {% endif %}
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      {% endwith %}
+      <h1>Verify your email</h1>
+      <p class="verification-recipient">We sent a six-digit verification code to <strong>{{ email }}</strong>. It expires in 10 minutes.</p>
+      <form method="post" class="stack verification-form">
+        <label for="otp">Verification code
+          <input id="otp" name="otp" type="text" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="one-time-code" placeholder="000000" required aria-describedby="otp-help">
+          <small id="otp-help">Enter the code from your email. You have up to five attempts.</small>
+        </label>
+        <button class="verification-submit" type="submit">Verify email</button>
+      </form>
+      <div class="verification-resend">
+        <p>Didn't receive the code?</p>
+        <form method="post" action="{{ url_for('resend_verification_email') }}">
+          <button class="secondary" type="submit">Resend code</button>
+        </form>
+      </div>
+      <p class="foot verification-footer">
+        <a href="{{ url_for('login') }}">Back to login</a> &middot; <a href="{{ url_for('register') }}">Register another account</a>
+      </p>
+    </section>
+  </div>
+{% endblock %}
+

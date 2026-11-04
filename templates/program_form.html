@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}
+  {% if program %}
+    Edit Program
+  {% else %}
+    Create Program
+  {% endif %}
+{% endblock %}
+{% block content %}
+  <section class="welcome">
+    <p class="eyebrow">{{ event.event_name }}</p>
+    <h1>
+      {% if program %}
+        Edit {{ program.program_name }}
+      {% else %}
+        Create a program
+      {% endif %}
+    </h1>
+  </section>
+  <section class="card wide program-form-card">
+    <form method="post" class="stack">
+      <label>Program name<input name="program_name" required maxlength="120" value="{{ program.program_name if program else '' }}">
+      </label>
+      <label>Description<textarea name="description" rows="4">{{ program.description if program else '' }}</textarea>
+      </label>
+      <div class="form-row">
+        <label>Category / type<input name="category" required value="{{ program.category if program else '' }}">
+        </label>
+        <label>Participation mode<select name="participation_mode" required>
+            <option value="INDIVIDUAL" {% if not program or program.participation_mode == 'INDIVIDUAL' %}selected{% endif %}>Individual</option>
+            <option value="TEAM" {% if program and program.participation_mode == 'TEAM' %}selected{% endif %}>Team</option>
+          </select>
+        </label>
+      </div>
+      <label>Team size <span class="muted">Required for Team programs (2–100); leave blank for Individual.</span>
+        <input name="team_size" type="number" min="2" max="100" value="{{ program.team_size if program and program.team_size else '' }}">
+      </label>
+      <div class="form-row">
+        <label>Start date and time<input name="start_at" type="datetime-local" required value="{{ program.start_at[:16] if program else '' }}">
+        </label>
+        <label>End date and time<input name="end_at" type="datetime-local" required value="{{ program.end_at[:16] if program else '' }}">
+        </label>
+      </div>
+      <div class="form-row">
+        <label>Registration deadline<input name="registration_deadline" type="datetime-local" required value="{{ program.registration_deadline[:16] if program else '' }}">
+        </label>
+        <label>Venue<input name="venue" required value="{{ program.venue if program else '' }}">
+        </label>
+      </div>
+      <label>Fee<input name="fee" type="number" min="0" step="0.01" required value="{{ program.fee if program else '0' }}">
+      </label>
+      {% if not program %}
+        <section class="program-host-form">
+          <h2>Program Host</h2>
+          <label>Host's registered email<input type="email" name="host_email" required>
+          </label>
+          <label>Co-Host's registered email (optional)<input type="email" name="co_host_email">
+          </label>
+        </section>
+      {% endif %}
+      <button type="submit">
+        {% if program %}
+          Save program
+        {% else %}
+          Create program
+        {% endif %}
+      </button>
+    </form>
+    <p class="foot">
+      {% if program and not is_event_manager %}
+        <a href="{{ url_for('program_detail', program_id=program.id) }}">Back to program</a>
+      {% else %}
+        <a href="{{ url_for('convener_event_dashboard', event_id=event.id) }}">Back to Event Dashboard</a>
+      {% endif %}
+    </p>
+  </section>
+{% endblock %}

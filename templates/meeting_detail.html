@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}
+  {{ meeting.title }}
+{% endblock %}
+{% block content %}
+  <section class="welcome">
+    <p class="eyebrow">MEETING DETAILS</p>
+    <h1>{{ meeting.title }}</h1>
+    <p>{{ meeting.event_name }}
+      {% if meeting.program_name %}
+         · {{ meeting.program_name }}
+      {% endif %}
+    </p>
+  </section>
+  <section class="card meeting-detail">
+    <p>
+      <strong>Date:</strong>{{ meeting.meeting_date }}</p>
+    <p>
+      <strong>Time:</strong>{{ meeting.start_time }}–{{ meeting.end_time }}</p>
+    <h2>Agenda</h2>
+    <p>{{ meeting.description or 'No agenda provided.' }}</p>
+    <a class="button" href="{{ meeting.meeting_link }}" target="_blank" rel="noopener">Join meeting</a>
+    <p>
+      <a href="{{ url_for('dashboard') }}">Back to dashboard</a>
+    </p>
+  </section>
+{% endblock %}

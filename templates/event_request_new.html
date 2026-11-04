@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block title %}
+  Request an event
+{% endblock %}
+{% block content %}
+  <header class="profile-page-heading">
+    <a class="profile-back-link" href="{{ url_for('dashboard') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M19 12H5m7 7-7-7 7-7"></path>
+      </svg>
+      Back to dashboard
+    </a>
+    <h1>Request a new event</h1>
+    <p>Send an event proposal to the root user for review.</p>
+  </header>
+
+  <div class="profile-layout request-new-layout">
+    <section class="card request-form-card request-event-card">
+      <h2>Event details</h2>
+      <form method="post" class="stack request-new-form">
+        <label class="request-field">
+          <span>Event title <span class="request-required" aria-hidden="true">*</span></span>
+          <input name="event_title" maxlength="120" required value="{{ request.form.get('event_title', '') }}" placeholder="Enter the event title">
+        </label>
+        <label class="request-field">
+          <span>Description and purpose <span class="request-required" aria-hidden="true">*</span></span>
+          <textarea name="description" rows="5" maxlength="2000" required placeholder="Describe the event and its purpose">{{ request.form.get('description', '') }}</textarea>
+          <small>A short summary helps the reviewer decide quickly.</small>
+        </label>
+        <div class="form-row request-date-venue-row">
+          <label class="request-field">
+            <span>Proposed date <span class="request-required" aria-hidden="true">*</span></span>
+            <input type="date" name="proposed_date" required value="{{ request.form.get('proposed_date', '') }}">
+          </label>
+          <label class="request-field">
+            <span>Proposed venue <span class="request-required" aria-hidden="true">*</span></span>
+            <input name="venue" maxlength="160" required value="{{ request.form.get('venue', '') }}" placeholder="Enter the proposed venue">
+          </label>
+        </div>
+        <div class="form-actions request-new-actions">
+          <a class="button secondary request-cancel" href="{{ url_for('dashboard') }}">Cancel</a>
+          <button>Submit for review</button>
+        </div>
+      </form>
+    </section>
+
+    <aside class="profile-sidebar request-new-sidebar">
+      <section class="card request-how-card">
+        <h2>How it works</h2>
+        <ol class="verification-steps request-how-steps" aria-label="Event request steps">
+          <li>
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+              <path d="M12 3v6h8M8 14h8m-8 4h8"></path>
+            </svg>
+            <span>Submit your proposal</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="12" r="9"></circle>
+              <path d="M12 7v5l3 2"></path>
+            </svg>
+            <span>Root reviews your request</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M4 5h16v14H4zM8 9h8m-8 4h8m-8 4h5"></path>
+            </svg>
+            <span>Track its status and Root note on your dashboard</span>
+          </li>
+        </ol>
+      </section>
+    </aside>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    document.querySelectorAll('.event-request-new-page > .notice.success, .event-request-new-page > .notice.error').forEach((notice) => {
+      const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      icon.setAttribute('class', 'request-flash-icon');
+      icon.setAttribute('viewBox', '0 0 24 24');
+      icon.setAttribute('fill', 'none');
+      icon.setAttribute('stroke', 'currentColor');
+      icon.setAttribute('stroke-width', '1.8');
+      icon.setAttribute('stroke-linecap', 'round');
+      icon.setAttribute('stroke-linejoin', 'round');
+      icon.setAttribute('aria-hidden', 'true');
+      icon.setAttribute('focusable', 'false');
+
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', '12');
+      circle.setAttribute('cy', '12');
+      circle.setAttribute('r', '9');
+      icon.append(circle);
+
+      const mark = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      mark.setAttribute('d', notice.classList.contains('success') ? 'm8 12 2.5 2.5L16.5 9' : 'M12 8v5m0 3h.01');
+      icon.append(mark);
+      notice.prepend(icon);
+    });
+  </script>
+{% endblock %}

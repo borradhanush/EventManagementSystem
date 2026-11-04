@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}
+  Meetings · {{ event.event_name }}
+{% endblock %}
+{% block content %}
+  <div class="meeting-page">
+    <header class="convener-event-header meeting-page-header">
+      <div class="meeting-page-topline">
+        <nav class="meeting-breadcrumb" aria-label="Breadcrumb">
+          <a href="{{ url_for('public_events') }}">Events</a>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 18 6-6-6-6"></path></svg>
+          <a href="{{ url_for('convener_event_dashboard', event_id=event.id) }}">{{ event.event_name }}</a>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 18 6-6-6-6"></path></svg>
+          <span aria-current="page">Meetings</span>
+        </nav>
+        <a class="convener-button convener-button-secondary meeting-back-link" href="{{ url_for('convener_event_dashboard', event_id=event.id) }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5m7 7-7-7 7-7"></path></svg>
+          Back to Event Dashboard
+        </a>
+      </div>
+      <div class="convener-title-row meeting-title-row">
+        <h1>{{ event.event_name }}</h1>
+        <span class="convener-role-badge">Event Meetings</span>
+      </div>
+      <p class="meeting-page-subtitle">Schedule event staff discussions and email invitations to the internal groups you select.</p>
+    </header>
+
+    <section class="convener-section-card meeting-panel" aria-labelledby="scheduled-meetings-heading">
+      <div class="convener-card-heading meeting-card-heading">
+        <span class="convener-icon-tile" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18M10 14h4m-2-2v4"></path></svg>
+        </span>
+        <div class="convener-card-title">
+          <h2 id="scheduled-meetings-heading">Scheduled meetings</h2>
+        </div>
+        <a class="convener-button convener-button-primary convener-header-action" href="{{ url_for('create_meeting', event_id=event.id) }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 5v14m-7-7h14"></path></svg>
+          Schedule meeting
+        </a>
+      </div>
+      <div class="meeting-card-divider" aria-hidden="true"></div>
+
+      {% if meetings %}
+        {% set month_names = {'01':'JAN', '02':'FEB', '03':'MAR', '04':'APR', '05':'MAY', '06':'JUN', '07':'JUL', '08':'AUG', '09':'SEP', '10':'OCT', '11':'NOV', '12':'DEC'} %}
+        <div class="meeting-list">
+          {% for meeting in meetings %}
+            <article class="meeting-card meeting-row">
+              <div class="meeting-date-tile" aria-label="Meeting date {{ meeting.meeting_date }}">
+                <span>{{ month_names.get(meeting.meeting_date[5:7], meeting.meeting_date[5:7]) }}</span>
+                <strong>{{ meeting.meeting_date[8:10] }}</strong>
+              </div>
+              <div class="meeting-copy">
+                <p class="meeting-context">{{ meeting.program_name or 'Event-level meeting' }}</p>
+                <h3>{{ meeting.title }}</h3>
+                <p class="meeting-meta">
+                  <span>{{ meeting.meeting_date }}</span>
+                  <span>{{ meeting.start_time }}–{{ meeting.end_time }}</span>
+                </p>
+                <p class="meeting-recipients">{{ meeting.group_count }} internal group(s), {{ meeting.team_count }} event team(s)</p>
+              </div>
+              <div class="meeting-actions">
+                <a class="convener-button convener-button-secondary" href="{{ url_for('edit_meeting', meeting_id=meeting.id) }}">Edit</a>
+                <form method="post" action="{{ url_for('send_meeting_invitation', meeting_id=meeting.id) }}">
+                  <button class="convener-button convener-button-secondary" type="submit">Send / resend email</button>
+                </form>
+                <form method="post" action="{{ url_for('delete_meeting', meeting_id=meeting.id) }}" onsubmit="return confirm('Delete this meeting?')">
+                  <button class="convener-button convener-button-danger" type="submit">Delete</button>
+                </form>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="convener-empty-state meeting-empty-state">
+          <span class="meeting-empty-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18"></path><circle cx="16" cy="16" r="4"></circle><path d="M16 14v2l1.5 1"></path></svg>
+          </span>
+          <h3>No meetings scheduled yet.</h3>
+          <p>Schedule a meeting to coordinate with your event's internal groups.</p>
+          <a class="convener-button convener-button-secondary" href="{{ url_for('create_meeting', event_id=event.id) }}">Schedule meeting</a>
+        </div>
+      {% endif %}
+    </section>
+  </div>
+{% endblock %}

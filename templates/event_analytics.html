@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+{% block title %}Analytics · {{ event.event_name }}{% endblock %}
+{% block content %}
+{% macro status_badge(value) -%}
+  {% set raw = value|string %}
+  {% set status = raw|upper %}
+  {% if not value %}
+    <span class="ui-badge ui-badge--neutral">—</span>
+  {% else %}
+    {% if status in ('UPCOMING',) %}{% set tone = 'info' %}
+    {% elif status in ('ONGOING', 'SUCCESS', 'PAID') %}{% set tone = 'success' %}
+    {% elif status in ('PENDING',) %}{% set tone = 'warning' %}
+    {% elif status in ('CANCELLED', 'FAILED') %}{% set tone = 'danger' %}
+    {% else %}{% set tone = 'neutral' %}{% endif %}
+    <span class="ui-badge ui-badge--{{ tone }}">{{ raw|title }}</span>
+  {% endif %}
+{%- endmacro %}
+{% macro formatted_datetime(raw) -%}
+  {% if not raw %}
+    —
+  {% else %}
+    {% set raw_date = raw|string %}
+    {% set month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] %}
+    {{ raw_date[8:10]|int }} {{ month_names[raw_date[5:7]|int - 1] }} {{ raw_date[:4] }}{% if raw_date|length >= 16 %}{% set hour = raw_date[11:13]|int %}, {{ (hour % 12) or 12 }}:{{ raw_date[14:16] }} {{ 'AM' if hour < 12 else 'PM' }}{% endif %}
+  {% endif %}
+{%- endmacro %}
+<div class="event-analytics-page">
+  <section class="ea-page-header">
+    <nav class="ea-breadcrumb" aria-label="Breadcrumb">
+      <a href="{{ url_for('public_events') }}">Events</a>
+      <span aria-hidden="true">›</span>
+      <a href="{{ url_for('convener_event_dashboard', event_id=event.id) }}">{{ event.event_name }}</a>
+      <span aria-hidden="true">›</span>
+      <span aria-current="page">Analytics</span>
+    </nav>
+    <div class="ea-header-main">
+      <div class="ea-heading-copy">
+        <div class="ea-title-row">
+          <h1>{{ event.event_name }}</h1>
+          <span class="ea-label-pill">Event Analytics</span>
+          {{ status_badge(event.status) }}
+        </div>
+        <p class="ea-subtitle">{{ event.description or 'All figures are calculated from current event records.' }}</p>
+      </div>
+      <a class="ui-btn ui-btn--secondary ea-back-button" href="{{ url_for('convener_event_dashboard', event_id=event.id) }}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m7 7-7-7 7-7"/></svg>
+        Back to Event Dashboard
+      </a>
+    </div>
+  </section>
+
+  {% set summary_cards = [
+    ('Total programs', analytics.programs|length, 'List of programs', 'list', 'indigo', ''),
+    ('Total registrations', analytics.registrations.total, 'Participant registrations', 'users', 'blue', 'University ' ~ analytics.registrations.university|string ~ ' · Outsider ' ~ analytics.registrations.outsider|string),
+    ('Successful mock payments', analytics.payments.successful_count, 'Credit card with check', 'payment-check', 'green', analytics.payments.paid_registrations|string ~ ' paid registrations'),
+    ('Successful mock amount', analytics.payments.successful_amount_cents, 'Currency', 'currency', 'amber', analytics.payments.successful_count|string ~ ' successful payments'),
+    ('Successful entries', analytics.attendance.total, 'Entry door', 'door', 'teal', 'Face ' ~ analytics.attendance.face|string ~ ' · QR ' ~ analytics.attendance.qr|string),
+    ('With accommodation', analytics.accommodation.allocated, 'Accommodation home', 'home', 'violet', 'of ' ~ analytics.accommodation.registered|string ~ ' registered participants'),
+    ('Total meetings', analytics.meetings.total, 'Calendar', 'calendar', 'rose', 'Event-level ' ~ analytics.meetings.event_level|string ~ ' · Program-level ' ~ analytics.meetings.program_level|string),
+    ('Paid registrations', analytics.payments.paid_registrations, 'Ticket', 'ticket', 'slate', 'of ' ~ analytics.registrations.total|string ~ ' registrations')
+  ] %}
+  <section class="ea-summary-grid" aria-label="Key event totals">
+    {% for label, value, icon_label, icon_name, tint, subline in summary_cards %}
+      <article class="ui-card ea-stat-card" style="--stagger:{{ loop.index0 }};">
+        <span class="ea-icon-tile ea-icon-{{ tint }}" aria-hidden="true">
+          {% if icon_name == 'list' %}<svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>
+          {% elif icon_name == 'users' %}<svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m6-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm10 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          {% elif icon_name == 'payment-check' %}<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18m-12 5 2 2 4-4"/></svg>
+          {% elif icon_name == 'currency' %}<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5c-.7-.8-1.7-1.2-3-1.2-1.5 0-2.5.7-2.5 1.8 0 3 5.5 1.2 5.5 4.4 0 1.2-1.1 2.1-2.8 2.1-1.3 0-2.4-.4-3.2-1.3M12 5v14"/></svg>
+          {% elif icon_name == 'door' %}<svg viewBox="0 0 24 24"><path d="M5 21V4l14-2v19M3 21h18M15 12h.01"/></svg>
+          {% elif icon_name == 'home' %}<svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zM9 21v-7h6v7"/></svg>
+          {% elif icon_name == 'calendar' %}<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>
+          {% else %}<svg viewBox="0 0 24 24"><path d="M3 5h18v14H3zM7 9h10M7 13h6"/></svg>{% endif %}
+        </span>
+        <span class="ea-stat-copy">
+          <span class="ea-stat-label">{{ label }}</span>
+          <strong class="{% if value == 0 %}is-zero{% endif %}">{% if label == 'Successful mock amount' %}₹{{ '{:,.2f}'.format(value / 100) }}{% else %}{{ '{:,}'.format(value|int) }}{% endif %}</strong>
+          {% if subline %}<span class="ea-stat-subline">{{ subline }}</span>{% endif %}
+        </span>
+      </article>
+    {% endfor %}
+  </section>
+
+  <section class="card ui-card ea-section" id="analytics-programs" style="--stagger:0;">
+    <header class="ea-section-header">
+      <span class="ea-icon-tile ea-icon-indigo" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 21V5l8-3 8 3v16M8 9h.01M16 9h.01M8 13h.01M16 13h.01M10 21v-4h4v4"/></svg></span>
+      <div><h2>Event summary</h2><p>Program counts grouped by current status.</p></div>
+    </header>
+    <div class="ea-mini-grid ea-mini-grid-five">
+      <article class="ea-mini-stat"><span>Total programs</span><strong>{{ '{:,}'.format(analytics.programs|length) }}</strong></article>
+      <article class="ea-mini-stat"><span>Upcoming</span><strong>{{ '{:,}'.format(analytics.program_status_counts.UPCOMING) }}</strong></article>
+      <article class="ea-mini-stat"><span>Ongoing</span><strong>{{ '{:,}'.format(analytics.program_status_counts.ONGOING) }}</strong></article>
+      <article class="ea-mini-stat"><span>Completed</span><strong>{{ '{:,}'.format(analytics.program_status_counts.COMPLETED) }}</strong></article>
+      <article class="ea-mini-stat"><span>Cancelled</span><strong>{{ '{:,}'.format(analytics.program_status_counts.CANCELLED) }}</strong></article>
+    </div>
+    {% if analytics.programs %}
+      {% set max_registrations = analytics.programs|map(attribute='registration_count')|max %}
+      <div class="ea-program-chart" role="group" aria-label="Registrations per program, with each bar scaled relative to the program with the most registrations.">
+        <h3>Registrations per program</h3>
+        {% for program in analytics.programs %}
+          {% set bar_percent = ((program.registration_count * 100 / max_registrations)|round(0)|int) if max_registrations else 0 %}
+          <div class="ea-chart-row" role="img" aria-label="{{ program.program_name or 'Unnamed program' }}: {{ program.registration_count }} registrations; bar is {{ bar_percent }} percent of the highest program count.">
+            <span class="ea-chart-label">{{ program.program_name or '—' }}</span>
+            <span class="ea-chart-track" aria-hidden="true"><span class="ea-chart-fill" style="width:{{ bar_percent }}%"></span></span>
+            <strong>{{ '{:,}'.format(program.registration_count|int) }}</strong>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </section>
+
+  <section class="card ui-card ea-section" id="analytics-registrations" style="--stagger:1;">
+    <header class="ea-section-header">
+      <span class="ea-icon-tile ea-icon-blue" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m6-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm10 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+      <div><h2>Registration statistics</h2><p>Participant totals and a program-by-program registration breakdown.</p></div>
+    </header>
+    <div class="ea-mini-grid">
+      <article class="ea-mini-stat"><span>Total registrations</span><strong>{{ '{:,}'.format(analytics.registrations.total|int) }}</strong></article>
+      <article class="ea-mini-stat"><span>University participants</span><strong>{{ '{:,}'.format(analytics.registrations.university|int) }}</strong></article>
+      <article class="ea-mini-stat"><span>Outsider participants</span><strong>{{ '{:,}'.format(analytics.registrations.outsider|int) }}</strong></article>
+    </div>
+    <div class="ea-table-wrap">
+      <table class="ea-table">
+        <thead><tr>
+          <th scope="col">Program</th><th scope="col">Mode</th><th scope="col" class="ea-number">Registrations</th><th scope="col" class="ea-number">Teams</th><th scope="col">Deadline</th><th scope="col">Status</th><th scope="col">Action</th>
+        </tr></thead>
+        <tbody>
+          {% for program in analytics.programs %}
+            <tr>
+              <td>{{ program.program_name or '—' }}</td>
+              <td>{{ program.participation_mode|title if program.participation_mode else '—' }}</td>
+              <td class="ea-number">{{ '{:,}'.format(program.registration_count|int) }}</td>
+              <td class="ea-number">{% if program.participation_mode == 'TEAM' %}{{ '{:,}'.format(program.team_count|int) }}{% else %}—{% endif %}</td>
+              <td>{{ formatted_datetime(program.registration_deadline) }}</td>
+              <td>{{ status_badge(program.status) }}</td>
+              <td><a class="ea-details-link" href="{{ url_for('program_analytics', program_id=program.id) }}">Details</a></td>
+            </tr>
+          {% else %}
+            <tr><td colspan="7"><div class="ea-empty-state"><span class="ea-empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM8 9h8M8 13h8M8 17h4"/></svg></span><strong>No programs yet.</strong><span>Program analytics will appear here when this event has programs.</span></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card ui-card ea-section" id="analytics-payments" style="--stagger:2;">
+    <header class="ea-section-header">
+      <span class="ea-icon-tile ea-icon-green" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18m-12 5 2 2 4-4"/></svg></span>
+      <div><h2>Mock payment statistics</h2><p>Payment attempts and simulated totals for this event.</p></div>
+    </header>
+    <p class="ea-payment-note">Simulated amounts only. These are not real financial transactions.</p>
+    <div class="ea-mini-grid ea-mini-grid-five">
+      <article class="ea-mini-stat"><span>Paid registrations</span><strong>{{ '{:,}'.format(analytics.payments.paid_registrations|int) }}</strong></article>
+      <article class="ea-mini-stat"><span>Successful mock payments</span><strong>{{ '{:,}'.format(analytics.payments.successful_count|int) }}</strong></article>
+      <article class="ea-mini-stat"><span>Pending attempts</span><strong>{{ '{:,}'.format(analytics.payments.pending_count|int) }}</strong></article>
+      <article class="ea-mini-stat"><span>Failed attempts</span><strong>{{ '{:,}'.format(analytics.payments.failed_count|int) }}</strong></article>
+      <article class="ea-mini-stat"><span>Successful mock amount</span><strong class="{% if analytics.payments.successful_amount_cents == 0 %}is-zero{% endif %}">₹{{ '{:,.2f}'.format(analytics.payments.successful_amount_cents / 100) }}</strong></article>
+    </div>
+    {% set paid_percent = ((analytics.payments.paid_registrations * 100 / analytics.registrations.total)|round(0)|int) if analytics.registrations.total else 0 %}
+    <div class="ea-progress-row">
+      <div class="ea-progress-copy"><span>Paid registrations vs total registrations</span><strong>{{ paid_percent }}%</strong></div>
+      <div class="ea-progress-track {% if paid_percent >= 50 and paid_percent <= 80 %}is-warning{% elif paid_percent > 80 %}is-success{% endif %}" role="img" aria-label="{{ analytics.payments.paid_registrations }} of {{ analytics.registrations.total }} registrations paid, {{ paid_percent }} percent">
+        <span style="--progress-width:{{ [paid_percent, 100]|min }}%;width:{{ [paid_percent, 100]|min }}%"></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card ui-card ea-section" id="analytics-attendance" style="--stagger:3;">
+    <header class="ea-section-header">
+      <span class="ea-icon-tile ea-icon-teal" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 21V4h14v17M3 21h18M9 12l2 2 4-4"/></svg></span>
+      <div><h2>Attendance / Gate statistics</h2><p>Successful entries and the verification methods used.</p></div>
+    </header>
+    <div class="ea-mini-grid">
+      <article class="ea-mini-stat"><span>Successful entries</span><strong>{{ '{:,}'.format(analytics.attendance.total|int) }}</strong></article>
+      <article class="ea-mini-stat"><span>Face verification</span><strong>{{ '{:,}'.format(analytics.attendance.face|int) }}</strong></article>
+      <article class="ea-mini-stat"><span>QR verification</span><strong>{{ '{:,}'.format(analytics.attendance.qr|int) }}</strong></article>
+    </div>
+    {% set attended_percent = ((analytics.attendance.total * 100 / analytics.registrations.total)|round(0)|int) if analytics.registrations.total else 0 %}
+    <div class="ea-progress-row">
+      <div class="ea-progress-copy"><span>Attended vs registered</span><strong>{{ attended_percent }}%</strong></div>
+      <div class="ea-progress-track {% if attended_percent >= 50 and attended_percent <= 80 %}is-warning{% elif attended_percent > 80 %}is-success{% endif %}" role="img" aria-label="{{ analytics.attendance.total }} of {{ analytics.registrations.total }} registrations have attendance entries, {{ attended_percent }} percent">
+        <span style="--progress-width:{{ [attended_percent, 100]|min }}%;width:{{ [attended_percent, 100]|min }}%"></span>
+      </div>
+    </div>
+    <div class="ea-table-wrap">
+      <table class="ea-table">
+        <thead><tr><th scope="col">Program</th><th scope="col" class="ea-number">Attendance entries</th></tr></thead>
+        <tbody>
+          {% for row in analytics.attendance_by_program %}
+            <tr><td>{{ row.program_name or '—' }}</td><td class="ea-number">{{ '{:,}'.format(row.attendance_count|int) }}</td></tr>
+          {% else %}
+            <tr><td colspan="2"><div class="ea-empty-state"><span class="ea-empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 21V4h14v17M3 21h18M9 12l2 2 4-4"/></svg></span><strong>No programs yet.</strong><span>Attendance counts will appear here when this event has programs.</span></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card ui-card ea-section" id="analytics-accommodation" style="--stagger:4;">
+    <header class="ea-section-header">
+      <span class="ea-icon-tile ea-icon-violet" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 10 12 3l9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zM9 21v-7h6v7"/></svg></span>
+      <div><h2>Accommodation summary</h2><p>Aggregate participant counts for accommodation requests and allocations.</p></div>
+    </header>
+    <div class="ea-mini-grid">
+      <article class="ea-mini-stat"><span>Registered participants</span><strong>{{ '{:,}'.format(analytics.accommodation.registered|int) }}</strong></article>
+      <article class="ea-mini-stat"><span>With accommodation</span><strong>{{ '{:,}'.format(analytics.accommodation.allocated|int) }}</strong></article>
+      <article class="ea-mini-stat"><span>Without accommodation</span><strong>{{ '{:,}'.format((analytics.accommodation.registered - analytics.accommodation.allocated)|int) }}</strong></article>
+    </div>
+    {% set allocated_percent = ((analytics.accommodation.allocated * 100 / analytics.accommodation.registered)|round(0)|int) if analytics.accommodation.registered else 0 %}
+    <div class="ea-progress-row">
+      <div class="ea-progress-copy"><span>Allocated vs registered participants</span><strong>{{ allocated_percent }}%</strong></div>
+      <div class="ea-progress-track {% if allocated_percent >= 50 and allocated_percent <= 80 %}is-warning{% elif allocated_percent > 80 %}is-success{% endif %}" role="img" aria-label="{{ analytics.accommodation.allocated }} of {{ analytics.accommodation.registered }} registered participants allocated accommodation, {{ allocated_percent }} percent">
+        <span style="--progress-width:{{ [allocated_percent, 100]|min }}%;width:{{ [allocated_percent, 100]|min }}%"></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card ui-card ea-section" id="analytics-meetings" style="--stagger:5;">
+    <header class="ea-section-header">
+      <span class="ea-icon-tile ea-icon-amber" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></span>
+      <div><h2>Meeting summary</h2><p>Meeting totals split by event and program level.</p></div>
+    </header>
+    <div class="ea-mini-grid">
+      <article class="ea-mini-stat"><span>Total meetings</span><strong>{{ '{:,}'.format(analytics.meetings.total|int) }}</strong></article>
+      <article class="ea-mini-stat"><span>Event-level</span><strong>{{ '{:,}'.format(analytics.meetings.event_level|int) }}</strong></article>
+      <article class="ea-mini-stat"><span>Program-level</span><strong>{{ '{:,}'.format(analytics.meetings.program_level|int) }}</strong></article>
+    </div>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Gate · {{ program.program_name }}{% endblock %}
+{% block content %}
+<div class="gate-verification-page">
+  <header class="gate-page-header">
+    <div class="gate-header-top">
+      <nav class="gate-breadcrumb" aria-label="Breadcrumb">
+        <a href="{{ url_for('gate_event', event_id=program.event_id) }}">Gate</a><span aria-hidden="true">›</span><span>{{ program.event_name }}</span><span aria-hidden="true">›</span><span>Program</span>
+      </nav>
+      <a class="gate-back-button" href="{{ url_for('gate_event', event_id=program.event_id) }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6M9 12h12"/></svg>Back to event gate</a>
+    </div>
+    <div class="gate-title-area">
+      <div class="gate-title-copy">
+        <div class="gate-title-row"><h1>{{ program.event_name }}</h1><span class="gate-status-pill {{ program.status|lower }}"><i></i>{{ program.status|title }}</span><span class="gate-label-pill">Gate Verification</span></div>
+        <p class="gate-program-line"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>{{ program.program_name }} <span>·</span> <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>{{ program.venue }}</p>
+      </div>
+      <div class="gate-entry-stat"><span class="gate-stat-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16M2 21h20M9 21v-5h6v5M9 8h.01M15 8h.01"/></svg></span><span><strong>{{ attendance }}</strong><small>Recorded entries</small></span></div>
+    </div>
+  </header>
+
+  <section class="card wide gate-card">
+    <div class="gate-card-heading">
+      <span class="gate-icon-tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+      <div><h2>Verify participant</h2><p>Use either face verification or the QR pass.</p></div>
+    </div>
+    <section id="gate-result" class="result-card" role="status" aria-live="polite" hidden></section>
+    <div class="gate-rule-note"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 11v5M12 8h.01"/></svg><span>A successful check records one entry; later attempts using either method are rejected.</span></div>
+    <div class="gate-columns">
+      <section class="gate-panel gate-qr-panel">
+        <div class="gate-panel-heading"><span class="gate-icon-tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM20 14v2M17 20h4M20 18v3"/></svg></span><h3>QR pass</h3></div>
+        <form id="qr-form" class="stack gate-form" method="post" enctype="multipart/form-data" action="{{ url_for('gate_verify_qr', event_id=program.event_id, program_id=program.id) }}">
+          <label>Pass token (optional if scanning with camera)<input name="token" autocomplete="off" maxlength="256" placeholder="Enter pass token"></label>
+          <button class="gate-primary gate-submit" type="submit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>Verify pass token</button>
+        </form>
+        <div class="gate-or-divider gate-camera-divider"><span>OR SCAN WITH CAMERA</span></div>
+        <div class="gate-camera-block gate-qr-camera-block">
+          <label for="gate-qr-camera-select">Camera<select id="gate-qr-camera-select" disabled><option value="">Select a camera</option></select></label>
+          <div class="gate-video-frame"><video id="gate-qr-camera" autoplay playsinline muted></video><div class="gate-video-placeholder"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM20 14v2M17 20h4M20 18v3"/></svg><span>Camera is off. Start the camera and hold a QR pass in view.</span></div><span class="gate-video-frame-line" aria-hidden="true"><i class="gate-frame-corner top-left"></i><i class="gate-frame-corner top-right"></i><i class="gate-frame-corner bottom-left"></i><i class="gate-frame-corner bottom-right"></i></span></div>
+          <canvas id="gate-qr-snapshot" hidden></canvas>
+          <div class="gate-preview-feedback"><p class="gate-preview-caption">Hold the QR pass inside the frame</p>
+          <p class="gate-capture-help" hidden>Start the camera first</p><p id="gate-qr-camera-status" class="muted gate-camera-status" role="status" aria-live="polite"></p></div>
+          <div class="inline-actions gate-camera-actions"><button id="gate-qr-start-camera" type="button" class="secondary"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 12 7-12 7V5Z"/></svg>Start camera</button><button id="gate-qr-capture" type="button" class="gate-primary" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM20 14v2M17 20h4M20 18v3"/></svg>Capture and verify QR</button></div>
+        </div>
+      </section>
+      <section class="gate-panel gate-face-panel">
+        <div class="gate-panel-heading"><span class="gate-icon-tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3M21 16v3a2 2 0 0 1-2 2h-3"/><circle cx="12" cy="10" r="3"/><path d="M7.5 18c1.2-2 2.7-3 4.5-3s3.3 1 4.5 3"/></svg></span><h3>Face verification</h3></div>
+        <p class="gate-panel-description">Select a camera and capture a frame to verify a participant. Exactly one face is required.</p>
+        <form id="face-form" class="gate-camera-block" method="post" enctype="multipart/form-data" action="{{ url_for('gate_verify_face', event_id=program.event_id, program_id=program.id) }}">
+          <label for="gate-camera-select">Camera<select id="gate-camera-select" disabled><option value="">Select a camera</option></select></label>
+          <div class="gate-video-frame"><video id="gate-camera" autoplay playsinline muted></video><div class="gate-video-placeholder"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="13" height="14" rx="2"/><path d="m16 10 5-3v10l-5-3M9 9l1.5 2L9 13"/></svg><span>Camera is off. Select a camera and press Start camera.</span></div><span class="gate-video-frame-line" aria-hidden="true"></span></div>
+          <canvas id="gate-snapshot" hidden></canvas>
+          <div class="gate-preview-feedback"><p class="gate-preview-caption">Center one face in the oval</p>
+          <p class="gate-capture-help" hidden>Start the camera first</p><p id="gate-camera-status" class="muted gate-camera-status" role="status" aria-live="polite"></p></div>
+          <div class="inline-actions gate-camera-actions"><button id="gate-start-camera" type="button" class="secondary"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 12 7-12 7V5Z"/></svg>Start camera</button><button id="gate-capture" type="button" class="gate-primary" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13" r="3"/></svg>Capture and verify</button></div>
+        </form>
+      </section>
+    </div>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/gate_verification.js') }}"></script>{% endblock %}

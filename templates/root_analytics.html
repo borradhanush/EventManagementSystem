@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}
+  Platform analytics
+{% endblock %}
+{% block content %}
+  <div class="root-analytics-page">
+    <section class="welcome">
+      <p class="eyebrow">ROOT · AGGREGATE ANALYTICS</p>
+      <h1>Platform statistics</h1>
+      <p>High-level totals only. No participant, face, QR, gate, or accommodation details are included.</p>
+    </section>
+    <section class="analytics-section root-analytics-summary">
+      <section class="root-analytics-group">
+        <h2>Events</h2>
+        <div class="root-analytics-grid root-analytics-grid-events">
+          <article class="analytics-card"><span class="convener-icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></span><strong class="{% if totals.event_count == 0 %}is-zero{% endif %}">{{ totals.event_count }}</strong><span>Total events</span></article>
+          <article class="analytics-card"><span class="convener-icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><strong class="{% if event_totals.UPCOMING == 0 %}is-zero{% endif %}">{{ event_totals.UPCOMING }}</strong><span>Upcoming events</span></article>
+          <article class="analytics-card"><span class="convener-icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m10 8 6 4-6 4z"/></svg></span><strong class="{% if event_totals.ONGOING == 0 %}is-zero{% endif %}">{{ event_totals.ONGOING }}</strong><span>Ongoing events</span></article>
+          <article class="analytics-card"><span class="convener-icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.7L4 8.5M4 4v4.5h4.5M8 12l2.5 2.5L16 9"/></svg></span><strong class="{% if event_totals.COMPLETED == 0 %}is-zero{% endif %}">{{ event_totals.COMPLETED }}</strong><span>Completed events</span></article>
+        </div>
+      </section>
+      <section class="root-analytics-group">
+        <h2>Activity</h2>
+        <div class="root-analytics-grid root-analytics-grid-activity">
+          <article class="analytics-card"><span class="convener-icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h10M7 16h6"/></svg></span><strong class="{% if totals.program_count == 0 %}is-zero{% endif %}">{{ totals.program_count }}</strong><span>Total programs</span></article>
+          <article class="analytics-card"><span class="convener-icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m6-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm10 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><strong class="{% if totals.registration_count == 0 %}is-zero{% endif %}">{{ totals.registration_count }}</strong><span>Total registrations</span></article>
+          <article class="analytics-card"><span class="convener-icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m6-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm10 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75m-4.5-3.5 1.5 1.5 3-3"/></svg></span><strong class="{% if totals.attendance_count == 0 %}is-zero{% endif %}">{{ totals.attendance_count }}</strong><span>Total attendance entries</span></article>
+        </div>
+      </section>
+      <section class="root-analytics-group root-analytics-payments">
+        <h2>Payments</h2>
+        <div class="root-analytics-grid root-analytics-grid-payments">
+          <article class="analytics-card"><span class="convener-icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></svg></span><strong class="{% if totals.successful_payment_count == 0 %}is-zero{% endif %}">{{ totals.successful_payment_count }}</strong><span>Successful mock payments</span></article>
+          <article class="analytics-card"><span class="convener-icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5c-.7-.8-1.7-1.2-3-1.2-1.5 0-2.5.7-2.5 1.8 0 3 5.5 1.2 5.5 4.4 0 1.2-1.1 2.1-2.8 2.1-1.3 0-2.4-.4-3.2-1.3M12 5v14"/></svg></span><strong class="{% if totals.successful_amount_cents == 0 %}is-zero{% endif %}">₹{{ '{:,.2f}'.format(totals.successful_amount_cents / 100) }}</strong><span>Successful mock amount</span></article>
+        </div>
+        <p class="analytics-note">Mock payment amounts are simulated only, not real financial transactions.</p>
+      </section>
+    </section>
+    <section class="analytics-section root-analytics-overview">
+      <h2>Event-level aggregate overview</h2>
+      <div class="table-wrap">
+        <table class="root-analytics-table">
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Status</th>
+              <th class="root-analytics-number">Programs</th>
+              <th class="root-analytics-number">Registrations</th>
+              <th class="root-analytics-number">Attendance entries</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for event in events %}
+              <tr>
+                <td>{{ event.event_name }}</td>
+                <td><span class="dashboard-badge dashboard-badge--{{ 'blue' if event.status == 'UPCOMING' else 'success' if event.status == 'ONGOING' else 'neutral' }}">{{ event.status|title }}</span></td>
+                <td class="root-analytics-number">{{ event.program_count }}</td>
+                <td class="root-analytics-number">{{ event.registration_count }}</td>
+                <td class="root-analytics-number">{{ event.attendance_count }}</td>
+              </tr>
+            {% else %}
+              <tr><td colspan="5">No events yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}
+  Edit rejected request
+{% endblock %}
+{% block content %}
+  <section class="card request-form-card">
+    <p class="eyebrow">REJECTED REQUEST #{{ item.id }}</p>
+    <h1>Edit and resubmit</h1>
+    <p>Update the event details, save them if you need more time, then resubmit the request to Root.</p>
+    <div class="previous-note">
+      <strong>Root's latest note</strong>
+      <p>{{ item.root_note or 'No rejection note was provided.' }}</p>
+    </div>
+    <form method="post" class="stack">
+      <label>Event title<input name="event_title" maxlength="120" required value="{{ request.form.get('event_title', item.event_title) }}">
+      </label>
+      <label>Description and purpose<textarea name="description" rows="5" maxlength="2000" required>{{ request.form.get('description', item.description) }}</textarea>
+      </label>
+      <div class="form-row">
+        <label>Proposed date<input type="date" name="proposed_date" required value="{{ request.form.get('proposed_date', item.proposed_date) }}">
+        </label>
+        <label>Proposed venue<input name="venue" maxlength="160" required value="{{ request.form.get('venue', item.venue) }}">
+        </label>
+      </div>
+      <div class="form-actions">
+        <a class="button secondary" href="{{ url_for('dashboard') }}">Back</a>
+        <button name="action" value="save" class="secondary">Save changes</button>
+        <button name="action" value="resubmit">Resubmit to Root</button>
+      </div>
+    </form>
+    {% if history %}
+      <details class="request-history">
+        <summary>Previous request and review history</summary>
+        {% for entry in history %}
+          <article>
+            <strong>{{ entry.action|title }}</strong><span class="muted"> · {{ entry.occurred_at }}</span>
+            <p>{{ entry.event_title }} — {{ entry.proposed_date }} at {{ entry.venue }}</p>
+            {% if entry.root_note %}
+              <p>
+                <strong>Root note:</strong>{{ entry.root_note }}</p>
+            {% endif %}
+            <p>{{ entry.description }}</p>
+          </article>
+        {% endfor %}
+      </details>
+    {% endif %}
+  </section>
+{% endblock %}

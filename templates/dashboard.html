@@ -1,0 +1,884 @@
+{% extends 'base.html' %}
+{% block title %}
+    Dashboard
+{% endblock %}
+{% block content %}
+    {% macro status_badge(label, value) %}
+        {% set v = (value|string)|lower %}
+        {% if v in ['success','registered','active','allocated','ongoing','entered','verified','approved'] %}
+            {% set tone = 'success' %}
+        {% elif v in ['pending','upcoming','open'] %}
+            {% set tone = 'warning' %}
+        {% elif v in ['failed','cancelled','rejected','closed','revoked'] %}
+            {% set tone = 'error' %}
+        {% else %}
+            {% set tone = 'neutral' %}
+        {% endif %}
+        <span class="dashboard-badge dashboard-badge--{{ tone }}">
+            {{ label }}
+        </span>
+    {% endmacro %}
+    {% macro icon(name) %}
+        <svg class="dashboard-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            {% if name == 'calendar' %}
+                <rect x="3" y="5" width="18" height="16" rx="2">
+                </rect>
+                <path d="M16 3v4M8 3v4M3 10h18">
+                </path>
+            {% elif name == 'users' %}
+                <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2">
+                </path>
+                <circle cx="10" cy="7" r="4">
+                </circle>
+                <path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75">
+                </path>
+            {% elif name == 'home' %}
+                <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1z">
+                </path>
+            {% elif name == 'clock' %}
+                <circle cx="12" cy="12" r="9">
+                </circle>
+                <path d="M12 7v5l3 2">
+                </path>
+            {% elif name == 'pin' %}
+                <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z">
+                </path>
+                <circle cx="12" cy="10" r="2.5">
+                </circle>
+            {% elif name == 'alert' %}
+                <path d="M12 3 2.8 19a1.4 1.4 0 0 0 1.2 2h16a1.4 1.4 0 0 0 1.2-2L12 3Z">
+                </path>
+                <path d="M12 9v4m0 4h.01">
+                </path>
+            {% elif name == 'ticket' %}
+                <path d="M4 5h16v4a3 3 0 0 0 0 6v4H4v-4a3 3 0 0 0 0-6V5Z">
+                </path>
+                <path d="M13 5v2m0 4v2m0 4v2">
+                </path>
+            {% endif %}
+        </svg>
+    {% endmacro %}
+    {% if user.role == 'root' %}
+        <section class="welcome dashboard-welcome dashboard-root-welcome">
+            <p class="eyebrow">
+                PLATFORM ADMINISTRATION
+            </p>
+            <h1>
+                Welcome,
+                {{ user.full_name }}
+            </h1>
+            <p>
+                Review event requests and monitor aggregate platform activity.
+            </p>
+        </section>
+        <section class="dashboard-root-tools">
+            <h2>Root tools</h2>
+            <div class="dashboard-root-tool-grid">
+                <a class="card dashboard-root-tool-card dashboard-root-tool-card-primary" href="{{ url_for('root_event_requests') }}">
+                    <span class="convener-icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"></path><path d="M14 3v5h5M8 13h8m-8 4h6"></path></svg></span>
+                    <span class="dashboard-root-tool-title">Request review</span>
+                    <span class="dashboard-root-tool-description">Review pending event requests</span>
+                </a>
+                <a class="card dashboard-root-tool-card" href="{{ url_for('root_events') }}">
+                    <span class="convener-icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18"></path><path d="m9 15 2 2 4-4"></path></svg></span>
+                    <span class="dashboard-root-tool-title">Approved events</span>
+                    <span class="dashboard-root-tool-description">See approved events and their convenors</span>
+                </a>
+                <a class="card dashboard-root-tool-card" href="{{ url_for('root_analytics') }}">
+                    <span class="convener-icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5m0 14h17M8 16v-5m5 5V7m5 9v-3"></path></svg></span>
+                    <span class="dashboard-root-tool-title">Platform analytics</span>
+                    <span class="dashboard-root-tool-description">View platform-wide totals</span>
+                </a>
+            </div>
+        </section>
+    {% else %}
+        {% set n = user.full_name %}
+        {% set display_name = n|title if n == n|upper else n %}
+        {% set parts = display_name.split() %}
+        {% set initials = (parts[0][0] ~ (parts[-1][0] if parts|length > 1 else ''))|upper %}
+        <section class="welcome dashboard-welcome">
+            <h1>
+                Welcome,
+                {{ display_name }}
+            </h1>
+            <p>
+                Your registrations, accommodation, and meetings in one place.
+            </p>
+        </section>
+        {% if not user.profile_completed %}
+            <section class="dashboard-profile-alert" role="status">
+                <span class="dashboard-alert-icon">
+                    {{ icon('alert') }}
+                </span>
+                <div class="dashboard-profile-alert-copy">
+                    <p>
+                        <strong>Complete your profile</strong>
+                        Add your phone and institute/university details before registering for a program.
+                    </p>
+                </div>
+                <a class="button" href="{{ url_for('profile') }}">
+                    Complete profile
+                </a>
+            </section>
+        {% endif %}
+        <div class="dashboard-layout">
+            <nav class="dashboard-stat-grid" aria-label="Dashboard summaries">
+    <a class="dashboard-stat-card" href="#my-registrations" aria-label="My registrations">
+        <span class="dashboard-stat-icon">
+            {{ icon('ticket') }}
+        </span>
+        <span class="dashboard-stat-value">
+            {{ registrations|length }}
+        </span>
+        <span class="dashboard-stat-label">
+            Registrations
+        </span>
+    </a>
+    <a class="dashboard-stat-card" href="#my-meetings">
+        <span class="dashboard-stat-icon">
+            {{ icon('calendar') }}
+        </span>
+        <span class="dashboard-stat-value">
+            {{ my_meetings|length }}
+        </span>
+        <span class="dashboard-stat-label">
+            Meetings
+        </span>
+    </a>
+    <a class="dashboard-stat-card" href="#my-accommodation">
+        <span class="dashboard-stat-icon">
+            {{ icon('home') }}
+        </span>
+        <span class="dashboard-stat-value">
+            {{ accommodations|length }}
+        </span>
+        <span class="dashboard-stat-label">
+            Accommodation
+        </span>
+    </a>
+    {% if my_teams %}
+        <a class="dashboard-stat-card" href="#my-teams">
+            <span class="dashboard-stat-icon">
+                {{ icon('users') }}
+            </span>
+            <span class="dashboard-stat-value">
+                {{ my_teams|length }}
+            </span>
+            <span class="dashboard-stat-label">
+                Teams
+            </span>
+        </a>
+    {% endif %}
+</nav>
+            <div class="dashboard-columns">
+                <div class="dashboard-main">
+
+                {% if events %}
+                    <section class="card request-section dashboard-section">
+                        <div class="section-heading dashboard-section-heading">
+                            <h2>
+                                Events you manage
+                            </h2>
+                            <span class="dashboard-count">
+                                {{ events|length }}
+                            </span>
+                        </div>
+                        <div class="dashboard-event-list">
+                            {% for event in events %}
+                                <article class="dashboard-event-row">
+                                    <div>
+                                        <h3>
+                                            {{ event.event_name }}
+                                        </h3>
+                                        <p>
+                                            {{ event.start_date }}
+                                            –
+                                            {{ event.end_date }}
+                                        </p>
+                                        <div class="dashboard-badge-row">
+                                            {{ status_badge(event.status,event.status) }}
+                                            {{ status_badge(event.visibility,event.visibility) }}
+                                        </div>
+                                    </div>
+                                    <a class="button secondary dashboard-action" href="{{ url_for('convener_event_dashboard', event_id=event.id) }}">
+                                        Event Dashboard
+                                    </a>
+                                </article>
+                            {% endfor %}
+                        </div>
+                    </section>
+                {% endif %}
+                {% if gate_events %}
+                    <section class="card request-section dashboard-section">
+                        <div class="section-heading dashboard-section-heading">
+                            <h2>
+                                Assigned Gate Duties
+                            </h2>
+                            <span class="dashboard-count">
+                                {{ gate_events|length }}
+                            </span>
+                        </div>
+                        <div class="dashboard-event-list">
+                            {% for event in gate_events %}
+                                <article class="dashboard-event-row">
+                                    <div>
+                                        <h3>
+                                            {{ event.event_name }}
+                                        </h3>
+                                        <p>
+                                            {{ event.start_date }}
+                                            –
+                                            {{ event.end_date }}
+                                        </p>
+                                    </div>
+                                    <a class="button dashboard-action" href="{{ url_for('gate_event', event_id=event.id) }}">
+                                        Open assigned gate
+                                    </a>
+                                </article>
+                            {% endfor %}
+                        </div>
+                    </section>
+                {% endif %}
+                {% if accommodation_events %}
+                    <section class="card request-section dashboard-section">
+                        <div class="section-heading dashboard-section-heading">
+                            <h2>
+                                Assigned Accommodation Duties
+                            </h2>
+                            <span class="dashboard-count">
+                                {{ accommodation_events|length }}
+                            </span>
+                        </div>
+                        <div class="dashboard-event-list">
+                            {% for event in accommodation_events %}
+                                <article class="dashboard-event-row">
+                                    <div>
+                                        <h3>
+                                            {{ event.event_name }}
+                                        </h3>
+                                        <p>
+                                            {{ event.start_date }}
+                                            –
+                                            {{ event.end_date }}
+                                        </p>
+                                    </div>
+                                    <a class="button secondary dashboard-action" href="{{ url_for('accommodation_event', event_id=event.id) }}">
+                                        Open allocations
+                                    </a>
+                                </article>
+                            {% endfor %}
+                        </div>
+                    </section>
+                {% endif %}
+                {% if my_programs %}
+                    <section class="card request-section dashboard-section">
+                        <div class="section-heading dashboard-section-heading">
+                            <h2>
+                                Programs you host
+                            </h2>
+                            <span class="dashboard-count">
+                                {{ my_programs|length }}
+                            </span>
+                        </div>
+                        <ul class="team-links dashboard-program-list">
+                            {% for program in my_programs %}
+                                <li>
+                                    <a href="{{ url_for('program_detail', program_id=program.id) }}">
+                                        {{ program.program_name }}
+                                    </a>
+                                    <span>
+                                        {{ program.event_name }}
+                                        ·
+                                        {{ 'Co-Host' if program.role == 'CO_HOST' else 'Program Host' }}
+                                        ·
+                                        {{ program.status }}
+                                    </span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </section>
+                {% endif %}
+                <section class="card request-section participant-registrations dashboard-section" id="my-registrations">
+                    <div class="section-heading dashboard-section-heading">
+                        <div>
+                            <h2>
+                                My program registrations
+                            </h2>
+                            <p>
+                                Registration status, payment, team, pass, attendance, and accommodation for your programs.
+                            </p>
+                        </div>
+                        {% if registrations %}
+                            <div class="dashboard-heading-actions">
+                                <span class="dashboard-count">
+                                    {{ registrations|length }}
+                                </span>
+                                <a class="button secondary dashboard-action" href="{{ url_for('public_events') }}">
+                                    Browse events
+                                </a>
+                            </div>
+                        {% else %}
+                            
+                        {% endif %}
+                    </div>
+                    {% if registrations %}
+                        <div class="registration-card-list">
+                            {% for item in registrations %}
+                                <article class="participant-registration-card dashboard-registration-card">
+                                    <header class="dashboard-registration-header">
+                                        <div>
+                                            <h3>
+                                                {{ item.program_name }}
+                                            </h3>
+                                            <p>
+                                                {{ item.event_name }}
+                                            </p>
+                                        </div>
+                                        <div class="dashboard-badge-row">
+                                            {{ status_badge(item.event_status ~ ' EVENT',item.event_status) }}
+                                            {{ status_badge(item.status ~ ' PROGRAM',item.status) }}
+                                            {{ status_badge('Registered','registered') }}
+                                        </div>
+                                    </header>
+                                    <div class="dashboard-registration-meta">
+                                        <span>
+                                            {{ icon('calendar') }}
+                                            <span>
+                                                {{ item.start_at }}
+                                                –
+                                                {{ item.end_at }}
+                                            </span>
+                                        </span>
+                                        <span>
+                                            {{ icon('pin') }}
+                                            <span>
+                                                {{ item.venue }}
+                                            </span>
+                                        </span>
+                                        <span>
+                                            {{ icon('clock') }}
+                                            <span>
+                                                {{ item.registration_deadline }}
+                                            </span>
+                                            {{ status_badge('Open' if item.registration_open and item.status != 'CANCELLED' else 'Closed','open' if item.registration_open and item.status != 'CANCELLED' else 'closed') }}
+                                        </span>
+                                    </div>
+                                    <dl class="dashboard-registration-details">
+                                        <div>
+                                            <dt>
+                                                Participation
+                                            </dt>
+                                            <dd>
+                                                {{ item.registration_mode|title }}
+                                            </dd>
+                                        </div>
+                                        <div>
+                                            <dt>
+                                                Registration type
+                                            </dt>
+                                            <dd>
+                                                {{ 'University' if item.participant_type == 'UNIVERSITY' else 'Outsider' }}
+                                            </dd>
+                                        </div>
+                                        <div>
+                                            <dt>
+                                                Institute ID
+                                            </dt>
+                                            <dd>
+                                                {{ item.institute_id or 'Not required' }}
+                                            </dd>
+                                        </div>
+                                    </dl>
+                                    <div class="dashboard-registration-panels">
+                                        <section class="participant-feature dashboard-mini-panel">
+                                            <h4>
+                                                Payment
+                                            </h4>
+                                            {% if item.fee|float <= 0 %}
+                                                <p>
+                                                    <strong>
+                                                        Free / No payment required
+                                                    </strong>
+                                                </p>
+                                                {{ status_badge('No payment required','free') }}
+                                            {% elif item.successful_payment %}
+                                                <p>
+                                                    {{ '%.2f'|format(item.successful_payment.amount_cents / 100) }}
+                                                    (mock)
+                                                </p>
+                                                {{ status_badge('Successful','success') }}
+                                                <a class="button secondary dashboard-action" href="{{ url_for('payment_receipt', payment_id=item.successful_payment.id) }}">
+                                                    View receipt
+                                                </a>
+                                            {% elif item.latest_payment and item.latest_payment.status == 'FAILED' %}
+                                                <p>
+                                                    Mock payment failed
+                                                </p>
+                                                {{ status_badge('Failed','failed') }}
+                                                <a class="button secondary dashboard-action" href="{{ url_for('payment_receipt', payment_id=item.latest_payment.id) }}">
+                                                    View attempt
+                                                </a>
+                                                <a class="button dashboard-action" href="{{ url_for('participant_payment', registration_id=item.id) }}">
+                                                    Retry payment
+                                                </a>
+                                            {% elif item.latest_payment and item.latest_payment.status == 'PENDING' %}
+                                                <p>
+                                                    Mock payment pending
+                                                </p>
+                                                {{ status_badge('Pending','pending') }}
+                                                <a class="button dashboard-action" href="{{ url_for('participant_payment', registration_id=item.id) }}">
+                                                    Continue payment
+                                                </a>
+                                            {% elif item.status == 'CANCELLED' %}
+                                                <p>
+                                                    Payment unavailable for cancelled program
+                                                </p>
+                                                {{ status_badge('Cancelled','cancelled') }}
+                                            {% else %}
+                                                <p>
+                                                    Payment not started ·
+                                                    {{ '%.2f'|format(item.fee) }}
+                                                    (mock)
+                                                </p>
+                                                {{ status_badge('Not started','neutral') }}
+                                                <a class="button dashboard-action" href="{{ url_for('participant_payment', registration_id=item.id) }}">
+                                                    Pay now
+                                                </a>
+                                            {% endif %}
+                                        </section>
+                                        <section class="participant-feature dashboard-mini-panel">
+                                            <h4>
+                                                QR pass
+                                            </h4>
+                                            {% if item.status == 'CANCELLED' %}
+                                                <p>
+                                                    Pass disabled because the program was cancelled
+                                                </p>
+                                                {{ status_badge('Cancelled','cancelled') }}
+                                            {% elif item.active_qr_pass %}
+                                                <p>
+                                                    {{ item.active_qr_pass.pass_number }}
+                                                </p>
+                                                {{ status_badge('Available',item.active_qr_pass.status) }}
+                                                <a class="button secondary dashboard-action" href="{{ url_for('participant_qr_pass', registration_id=item.id) }}">
+                                                    View QR pass
+                                                </a>
+                                            {% elif item.fee|float > 0 and not item.successful_payment %}
+                                                <p>
+                                                    Available after successful mock payment
+                                                </p>
+                                                {{ status_badge('Payment required','pending') }}
+                                            {% else %}
+                                                <p>
+                                                    QR pass not generated yet
+                                                </p>
+                                                {{ status_badge('Not generated','neutral') }}
+                                                <a class="button secondary dashboard-action" href="{{ url_for('participant_qr_pass', registration_id=item.id) }}">
+                                                    Open QR pass page
+                                                </a>
+                                            {% endif %}
+                                        </section>
+                                        <section class="participant-feature dashboard-mini-panel">
+                                            <h4>
+                                                Attendance
+                                            </h4>
+                                            {% if item.attendance %}
+                                                <p>
+                                                    {{ item.attendance.verification_method }}
+                                                    ·
+                                                    {{ item.attendance.entered_at }}
+                                                </p>
+                                                {{ status_badge('Entered / Verified','verified') }}
+                                            {% else %}
+                                                <p>
+                                                    Not entered yet
+                                                </p>
+                                                {{ status_badge('Not entered yet','neutral') }}
+                                            {% endif %}
+                                        </section>
+                                        <section class="participant-feature dashboard-mini-panel">
+                                            <h4>
+                                                Accommodation
+                                            </h4>
+                                            {% if item.accommodation %}
+                                                <p>
+                                                    {{ item.accommodation.accommodation_name }}
+                                                </p>
+                                                {{ status_badge('Allocated','allocated') }}
+                                                <a class="button secondary dashboard-action" href="#my-accommodation">
+                                                    View accommodation details
+                                                </a>
+                                            {% else %}
+                                                <p>
+                                                    Not allocated
+                                                </p>
+                                                {{ status_badge('Not allocated','neutral') }}
+                                            {% endif %}
+                                        </section>
+                                    </div>
+                                    {% if item.participation_mode == 'TEAM' %}
+                                        <section class="dashboard-participant-team">
+                                            <div class="dashboard-team-heading">
+                                                <h4>
+                                                    Participant team
+                                                </h4>
+                                                {% if item.participant_team %}
+                                                    {{ status_badge(item.participant_team.status,item.participant_team.status) }}
+                                                {% endif %}
+                                            </div>
+                                            {% if item.participant_team %}
+                                                <p>
+                                                    <strong>
+                                                        {{ item.participant_team.display_name }}
+                                                    </strong>
+                                                </p>
+                                                <p>
+                                                    {% if item.participant_team.is_captain %}
+                                                        You are the captain
+                                                    {% else %}
+                                                        Captain:
+                                                        {% for member in item.participant_team.members %}
+                                                            {% if member.is_captain %}
+                                                                {{ member.full_name }}
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    {% endif %}
+                                                </p>
+                                                <p>
+                                                    {{ item.participant_team.members|length }}
+                                                    /
+                                                    {{ item.participant_team.team_size }}
+                                                    participants
+                                                </p>
+                                                <ul class="compact-member-list">
+                                                    {% for member in item.participant_team.members %}
+                                                        <li>
+                                                            {{ member.full_name }}
+                                                            {% if member.is_captain %}
+                                                                · Captain
+                                                            {% endif %}
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                                <a class="button secondary dashboard-action" href="{{ url_for('participant_team_detail', team_id=item.participant_team.id) }}">
+                                                    View my team
+                                                </a>
+                                            {% elif item.registration_open and item.status != 'CANCELLED' %}
+                                                <p>
+                                                    No team formed yet
+                                                </p>
+                                                <a class="button secondary dashboard-action" href="{{ url_for('participant_program_teams', program_id=item.program_id) }}">
+                                                    Find or create a team
+                                                </a>
+                                            {% else %}
+                                                <p>
+                                                    No team formed yet. Team formation is closed for this program.
+                                                </p>
+                                                <a class="button secondary dashboard-action" href="{{ url_for('participant_program_teams', program_id=item.program_id) }}">
+                                                    View program teams
+                                                </a>
+                                            {% endif %}
+                                        </section>
+                                    {% endif %}
+                                    <footer class="dashboard-registration-footer">
+                                        <span>
+                                            {{ 'Editable before deadline' if item.can_edit else 'View only' }}
+                                        </span>
+                                        <div class="dashboard-heading-actions">
+                                            <a class="button secondary dashboard-action" href="{{ url_for('participant_registration_detail', registration_id=item.id) }}">
+                                                View registration
+                                            </a>
+                                            {% if item.can_edit %}
+                                                <a class="button secondary dashboard-action" href="{{ url_for('edit_participant_registration', registration_id=item.id) }}">
+                                                    Edit registration
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </footer>
+                                </article>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state dashboard-empty-state">
+                            <span class="dashboard-empty-icon">
+                                {{ icon('ticket') }}
+                            </span>
+                            <p>You have no program registrations yet. Browse public events to find a program.</p>
+                            <a class="button dashboard-action" href="{{ url_for('public_events') }}">
+                                Browse events
+                            </a>
+                        </div>
+                    {% endif %}
+                </section>
+                {% if my_teams %}
+                    <section class="card request-section dashboard-section" id="my-teams">
+                        <div class="section-heading dashboard-section-heading">
+                            <div>
+                                <h2>
+                                    My event management teams
+                                </h2>
+                                <p>
+                                    These are event operations teams, separate from participant teams.
+                                </p>
+                            </div>
+                            <span class="dashboard-count">
+                                {{ my_teams|length }}
+                            </span>
+                        </div>
+                        <ul class="team-links dashboard-team-list">
+                            {% for team in my_teams %}
+                                <li class="dashboard-team-row">
+                                    <div>
+                                        <a href="{{ url_for('team_detail', team_id=team.id) }}">
+                                            {{ team.team_name }}
+                                        </a>
+                                        <span>
+                                            {{ team.event_name }}
+                                        </span>
+                                    </div>
+                                    {{ status_badge(team.relation,'neutral') }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </section>
+                {% else %}
+                    <div class="dashboard-empty-anchor" id="my-teams">
+                    </div>
+                {% endif %}
+                {% if event_requests %}
+                    <section class="card request-section dashboard-section dashboard-requests">
+                        <div class="section-heading dashboard-section-heading">
+                            <h2>
+                                My event requests
+                            </h2>
+                            <span class="dashboard-count">
+                                {{ event_requests|length }}
+                            </span>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Event
+                                        </th>
+                                        <th>
+                                            Proposed date
+                                        </th>
+                                        <th>
+                                            Status
+                                        </th>
+                                        <th>
+                                            Root note
+                                        </th>
+                                        <th>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in event_requests %}
+                                        <tr>
+                                            <td>
+                                                {{ item.event_title }}
+                                            </td>
+                                            <td>
+                                                {{ item.proposed_date }}
+                                            </td>
+                                            <td>
+                                                {{ status_badge(item.status|title,item.status) }}
+                                            </td>
+                                            <td>
+                                                {{ item.root_note or 'No note' }}
+                                            </td>
+                                            <td>
+                                                {% if item.status == 'rejected' %}
+                                                    <a href="{{ url_for('edit_event_request', request_id=item.id) }}">
+                                                        Edit / resubmit
+                                                    </a>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                {% endif %}
+            </div>
+            <aside class="dashboard-sidebar">
+                <section class="card dashboard-profile dashboard-profile-card">
+                    <div class="dashboard-avatar" aria-hidden="true">
+                        {{ initials }}
+                    </div>
+                    <div class="dashboard-profile-copy">
+                        <h2>
+                            {{ display_name }}
+                        </h2>
+                        <p>
+                            {{ user.email }}
+                        </p>
+                        <div class="dashboard-profile-chips">
+                            {{ status_badge(user.affiliation|title,'neutral') }}
+                        </div>
+                        <p class="dashboard-institution">
+                            {{ user.institution or 'Institution not provided' }}
+                        </p>
+                        <div class="dashboard-face-status">
+                            <span>
+                                Face registration
+                            </span>
+                            {% if user.face_registered %}
+                                {{ status_badge('Registered','success') }}
+                            {% else %}
+                                {{ status_badge('Not registered','pending') }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="dashboard-profile-actions">
+                        <a class="button secondary dashboard-action" href="{{ url_for('profile') }}">
+                            Edit profile
+                        </a>
+                        <a class="button secondary dashboard-action" href="{{ url_for('face_registration') }}">
+                            {% if user.face_registered %}
+                                Update face registration
+                            {% else %}
+                                Register face
+                            {% endif %}
+                        </a>
+                        {% if user.face_registered %}
+                            <a class="button secondary dashboard-action" href="{{ url_for('face_verification') }}">
+                                Test face verification
+                            </a>
+                        {% endif %}
+                    </div>
+                </section>
+                <section class="card request-section dashboard-section accommodation-summary" id="my-accommodation">
+                    <div class="section-heading dashboard-section-heading">
+                        <h2>
+                            My accommodation
+                        </h2>
+                        {% if accommodations %}
+                            <span class="dashboard-count">
+                                {{ accommodations|length }}
+                            </span>
+                        {% else %}
+                            {{ status_badge('Not yet allocated','neutral') }}
+                        {% endif %}
+                    </div>
+                    {% if accommodations %}
+                        <div class="dashboard-allocation-list">
+                            {% for item in accommodations %}
+                                <article class="allocation-summary">
+                                    <div class="dashboard-allocation-heading">
+                                        {{ status_badge('Allocated','allocated') }}
+                                        <strong>
+                                            {{ item.event_name }}
+                                        </strong>
+                                    </div>
+                                    <p>
+                                        <strong>
+                                            Accommodation:
+                                        </strong>
+                                        {{ item.accommodation_name }}
+                                    </p>
+                                    <p>
+                                        <strong>
+                                            Room:
+                                        </strong>
+                                        {{ item.room_details }}
+                                    </p>
+                                    <p>
+                                        <strong>
+                                            Stay:
+                                        </strong>
+                                        {{ item.stay_from }}
+                                        –
+                                        {{ item.stay_until }}
+                                    </p>
+                                    {% if item.notes %}
+                                        <p>
+                                            <strong>
+                                                Notes:
+                                            </strong>
+                                            {{ item.notes }}
+                                        </p>
+                                    {% endif %}
+                                </article>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state dashboard-empty-state dashboard-accommodation-empty">
+                            <span class="dashboard-empty-icon">
+                                {{ icon('home') }}
+                            </span>
+                            <p>No accommodation has been allocated yet.</p>
+                        </div>
+                    {% endif %}
+                </section>
+                <section class="card request-section dashboard-section" id="my-meetings">
+                    <div class="section-heading dashboard-section-heading">
+                        <h2>
+                            My meetings
+                        </h2>
+                        {% if my_meetings %}
+                            <span class="dashboard-count">
+                                {{ my_meetings|length }}
+                            </span>
+                        {% endif %}
+                    </div>
+                    {% if my_meetings %}
+                        <div class="meeting-list dashboard-meeting-list">
+                            {% for meeting in my_meetings %}
+                                <article class="meeting-card dashboard-meeting-card">
+                                    <div class="dashboard-meeting-copy">
+                                        <div class="dashboard-meeting-heading">
+                                            <h3>
+                                                {{ meeting.title }}
+                                            </h3>
+                                            {{ status_badge('Meeting', 'neutral') }}
+                                        </div>
+                                        <p>
+                                            {{ meeting.event_name }}
+                                            {% if meeting.program_name %}
+                                                ·
+                                                {{ meeting.program_name }}
+                                            {% endif %}
+                                        </p>
+                                        <p>
+                                            <span>
+                                                {{ icon('calendar') }}
+                                                {{ meeting.meeting_date }}
+                                            </span>
+                                            <span>
+                                                {{ icon('clock') }}
+                                                {{ meeting.start_time }}
+                                                –
+                                                {{ meeting.end_time }}
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <div class="inline-actions dashboard-meeting-actions">
+                                        <a class="button secondary dashboard-action" href="{{ url_for('participant_meeting_detail', meeting_id=meeting.id) }}">
+                                            View agenda
+                                        </a>
+                                        <a class="button dashboard-action" href="{{ meeting.meeting_link }}" target="_blank" rel="noopener">
+                                            Join
+                                        </a>
+                                    </div>
+                                </article>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state dashboard-empty-state">
+                            <span class="dashboard-empty-icon">
+                                {{ icon('calendar') }}
+                            </span>
+                            <p>No meetings are associated with your registrations or teams.</p>
+                        </div>
+                    {% endif %}
+                </section>
+            </aside>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

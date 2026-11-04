@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}
+  Participant team · {{ team.program_name }}
+{% endblock %}
+{% block content %}
+  <section class="welcome">
+    <p class="eyebrow">{{ team.event_name }} · {{ team.program_name }}</p>
+    <h1>{{ team.captain_name }}’s team</h1>
+    <p>{{ members|length }} / {{ team.team_size }} members</p>
+  </section>
+  <section class="card wide participant-teams-card">
+    <h2>Team members</h2>
+    <ul class="participant-team-member-list">
+      {% for member in members %}
+        <li>
+          <span>{{ member.full_name }}
+            {% if member.is_captain %}
+              <strong>(Captain)</strong>
+            {% endif %}
+          </span>
+          {% if team.is_captain and not member.is_captain %}
+            <form method="post" action="{{ url_for('remove_participant_team_member', team_id=team.id, registration_id=member.registration_id) }}" onsubmit="return confirm('Remove this participant from your team?')">
+              <button class="danger" type="submit">Remove</button>
+            </form>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+    {% if team.is_captain and formation_open and not at_capacity %}
+      <form class="participant-team-add" method="post" action="{{ url_for('add_participant_team_member', team_id=team.id) }}">
+        <label>Registered participant email<input type="email" name="email" required>
+        </label>
+        <button type="submit">Add participant</button>
+        <p>Only a participant already registered for this program can be added.</p>
+      </form>
+    {% elif team.is_captain and at_capacity %}
+      <p class="notice">This team has reached the configured maximum size.</p>
+    {% elif team.is_captain and not formation_open %}
+      <p class="notice">No new members can be added after the deadline or cancellation.</p>
+    {% endif %}
+    {% if team.is_member %}
+      <form method="post" action="{{ url_for('leave_participant_team', team_id=team.id) }}" onsubmit="return confirm('Leave this participant team?')">
+        <button class="danger" type="submit">Leave team</button>
+      </form>
+    {% endif %}
+    <p class="foot">
+      <a href="{{ url_for('participant_program_teams', program_id=team.program_id) }}">Back to program teams</a>
+    </p>
+  </section>
+{% endblock %}

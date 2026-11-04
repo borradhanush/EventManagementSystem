@@ -1,0 +1,107 @@
+:root {
+    --color-primary:#4F46E5;
+    --color-primary-hover:#4338CA;
+    --color-primary-tint:#EEF2FF;
+    --color-text:#111827;
+    --color-text-muted:#6B7280;
+    --color-border:#E5E7EB;
+    --color-input-border:#D1D5DB;
+    --color-bg:#F6F7FB;
+    --color-surface:#FFFFFF;
+    --color-success:#059669;
+    --color-success-tint:#ECFDF5;
+    --color-success-border:#A7F3D0;
+    --color-warning:#D97706;
+    --color-warning-tint:#FFFBEB;
+    --color-warning-border:#FDE68A;
+    --color-danger:#DC2626;
+    --color-danger-tint:#FEF2F2;
+    --color-danger-border:#FCA5A5;
+    --color-info:#2563EB;
+    --color-info-tint:#EFF6FF;
+    --space-1:4px;
+    --space-2:8px;
+    --space-3:12px;
+    --space-4:16px;
+    --space-5:20px;
+    --space-6:24px;
+    --space-8:32px;
+    --space-12:48px;
+    --font-sans:Inter,system-ui,"Segoe UI",sans-serif;
+    --text-xs:12px;
+    --text-sm:13px;
+    --text-base:15px;
+    --text-md:16px;
+    --text-lg:18px;
+    --text-xl:20px;
+    --text-2xl:24px;
+    --text-3xl:32px;
+    --radius-sm:8px;
+    --radius-md:12px;
+    --radius-lg:14px;
+    --radius-pill:999px;
+    --shadow-card:0 1px 2px rgba(16,24,40,.05),0 1px 3px rgba(16,24,40,.08);
+    --transition-fast:150ms ease;
+}
+
+/* Namespaced utilities avoid collisions with the app's existing .card and button styles. */
+.ui-badge {
+    display:inline-flex;
+    min-height:24px;
+    align-items:center;
+    gap:6px;
+    padding:4px 10px;
+    border-radius:var(--radius-pill);
+    background:#F3F4F6;
+    color:#4B5563;
+    font:600 var(--text-xs)/1.2 var(--font-sans);
+    white-space:nowrap;
+}
+.ui-badge::before {
+    width:6px;
+    height:6px;
+    flex:0 0 auto;
+    border-radius:50%;
+    background:currentColor;
+    content:"";
+}
+.ui-badge--success { background:var(--color-success-tint); color:var(--color-success); }
+.ui-badge--warning { background:var(--color-warning-tint); color:var(--color-warning); }
+.ui-badge--danger { background:var(--color-danger-tint); color:var(--color-danger); }
+.ui-badge--info { background:var(--color-info-tint); color:var(--color-info); }
+.ui-badge--neutral { background:#F3F4F6; color:#4B5563; }
+.ui-badge--primary { background:var(--color-primary-tint); color:var(--color-primary); }
+
+.ui-card {
+    padding:28px;
+    border:1px solid var(--color-border);
+    border-radius:var(--radius-lg);
+    background:var(--color-surface);
+    box-shadow:var(--shadow-card);
+}
+.ui-btn {
+    display:inline-flex;
+    min-height:44px;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding:10px 16px;
+    border:1px solid transparent;
+    border-radius:var(--radius-sm);
+    font:600 var(--text-base)/1.35 var(--font-sans);
+    text-decoration:none;
+    cursor:pointer;
+    transition:background-color var(--transition-fast),border-color var(--transition-fast),color var(--transition-fast),box-shadow var(--transition-fast),transform var(--transition-fast);
+}
+.ui-btn--primary { background:var(--color-primary); color:#fff; }
+.ui-btn--primary:hover { background:var(--color-primary-hover); color:#fff; }
+.ui-btn--secondary { border-color:var(--color-border); background:#fff; color:var(--color-text); }
+.ui-btn--secondary:hover { background:#F9FAFB; color:var(--color-text); }
+.ui-btn--danger { background:var(--color-danger); color:#fff; }
+.ui-btn--danger:hover { background:#B91C1C; color:#fff; }
+.ui-btn:active { transform:translateY(1px); }
+.ui-btn:focus-visible { outline:3px solid rgba(79,70,229,.35); outline-offset:2px; }
+.ui-btn:disabled,.ui-btn[aria-disabled="true"] { opacity:.55; cursor:not-allowed; pointer-events:none; }
+@media(max-width:767px) {
+    .ui-card { padding:20px; }
+}

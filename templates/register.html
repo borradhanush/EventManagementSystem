@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}
+  Create account
+{% endblock %}
+{% block content %}
+  <div class="register-layout">
+    <aside class="register-brand-panel" aria-labelledby="register-brand-heading">
+      <h2 id="register-brand-heading">Join your campus community</h2>
+      <p>Find campus activities, connect with your community, and keep your event plans in one place.</p>
+      <ul>
+        <li>
+          <svg class="login-feature-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="m5 12.5 4.2 4.2L19 7"></path>
+          </svg>
+          <span>Discover campus events</span>
+        </li>
+        <li>
+          <svg class="login-feature-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="m5 12.5 4.2 4.2L19 7"></path>
+          </svg>
+          <span>Register for activities</span>
+        </li>
+        <li>
+          <svg class="login-feature-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="m5 12.5 4.2 4.2L19 7"></path>
+          </svg>
+          <span>Keep track of your plans</span>
+        </li>
+      </ul>
+    </aside>
+    <section class="card register-card">
+      <h1>Create your account</h1>
+      <p class="register-intro">Join Campus Events to discover and register for events.</p>
+      <form method="post" class="stack register-form">
+        <label>Full name
+          <input name="full_name" maxlength="120" required autocomplete="name" placeholder="Enter your full name">
+        </label>
+        <label>Email
+          <input type="email" name="email" maxlength="254" required autocomplete="email" placeholder="Enter your email address">
+        </label>
+        <label>Password
+          <span class="password-field">
+            <input type="password" name="password" minlength="8" required autocomplete="new-password" placeholder="Create a password">
+            <button class="password-toggle" type="button" aria-label="Show password" aria-pressed="false" title="Show password">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"></path>
+                <circle cx="12" cy="12" r="2.7"></circle>
+                <path class="eye-slash" d="m4 4 16 16"></path>
+              </svg>
+            </button>
+          </span>
+          <span class="register-password-hint">Use at least 8 characters.</span>
+        </label>
+        <button class="register-submit" type="submit">Create account</button>
+        <p class="register-verification-note">We'll send a verification email before you can sign in.</p>
+      </form>
+      <p class="foot">Already registered? <a href="{{ url_for('login') }}">Log in</a></p>
+    </section>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/login.js') }}" defer>
+  </script>
+{% endblock %}

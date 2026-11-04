@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% block title %}{{ program.program_name }}{% endblock %}
+{% block content %}
+{% macro friendly_datetime(raw) -%}
+  {% if not raw %}
+    —
+  {% else %}
+    {% set value = raw|string %}
+    {% set months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] %}
+    {% set hour = value[11:13]|int if value|length >= 16 else none %}
+    {{ value[8:10]|int }} {{ months[value[5:7]|int - 1] }} {{ value[:4] }}{% if hour is not none %}, {{ (hour % 12) or 12 }}:{{ value[14:16] }} {{ 'AM' if hour < 12 else 'PM' }}{% endif %}
+  {% endif %}
+{%- endmacro %}
+{% macro friendly_range(start, end) -%}
+  {% if not start or not end %}
+    —
+  {% else %}
+    {% set start_value = start|string %}
+    {% set end_value = end|string %}
+    {% set months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] %}
+    {% set start_month = months[start_value[5:7]|int - 1] %}
+    {% set end_month = months[end_value[5:7]|int - 1] %}
+    {% set start_hour = start_value[11:13]|int %}
+    {% set end_hour = end_value[11:13]|int %}
+    {% set start_time = ((start_hour % 12) or 12)|string ~ ':' ~ start_value[14:16] ~ ' ' ~ ('AM' if start_hour < 12 else 'PM') %}
+    {% set end_time = ((end_hour % 12) or 12)|string ~ ':' ~ end_value[14:16] ~ ' ' ~ ('AM' if end_hour < 12 else 'PM') %}
+    {{ start_value[8:10]|int }} {{ start_month }} {{ start_value[:4] }}, {{ start_time }} <wbr>–<wbr> {{ end_value[8:10]|int }} {{ end_month }} {{ end_value[:4] }}, {{ end_time }}
+  {% endif %}
+{%- endmacro %}
+{% set status = program.status|string|upper %}
+{% if status == 'UPCOMING' %}{% set status_tone = 'info' %}
+{% elif status == 'ONGOING' %}{% set status_tone = 'success' %}
+{% elif status == 'COMPLETED' %}{% set status_tone = 'neutral' %}
+{% elif status == 'CANCELLED' %}{% set status_tone = 'danger' %}
+{% else %}{% set status_tone = 'neutral' %}{% endif %}
+<div class="program-detail-page">
+  <header class="program-detail-header">
+    <nav class="program-detail-breadcrumb" aria-label="Breadcrumb">
+      <a href="{{ url_for('public_events') }}">Events</a>
+      <span aria-hidden="true">›</span>
+      <a href="{{ url_for('public_event_detail', event_id=program.event_id) }}">{{ program.event_name }}</a>
+      <span aria-hidden="true">›</span>
+      <span aria-current="page">Program</span>
+    </nav>
+    <div class="program-detail-header-main">
+      <div class="program-detail-heading-copy">
+        <p class="program-event-eyebrow visually-hidden">{{ program.event_name }} · {{ program.status }}</p>
+        <div class="program-detail-title-row">
+          <h1>{{ program.program_name }}</h1>
+          <span class="ui-badge ui-badge--{{ status_tone }}">{{ program.status|title }}</span>
+          <span class="program-category-pill">{{ program.category|title if program.category else '—' }}</span>
+          <span class="program-mode-pill">{{ program.participation_mode|title if program.participation_mode else '—' }}</span>
+        </div>
+        <p class="program-detail-subtitle visually-hidden">{{ program.category }} · {{ program.participation_mode }}</p>
+      </div>
+      {% if is_event_manager %}
+        <a class="ui-btn ui-btn--secondary program-detail-back" href="{{ url_for('convener_event_dashboard', event_id=program.event_id) }}">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m7 7-7-7 7-7"/></svg>
+          Back to Event Dashboard
+        </a>
+      {% else %}
+        <a class="ui-btn ui-btn--secondary program-detail-back" href="{{ url_for('dashboard') }}">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m7 7-7-7 7-7"/></svg>
+          Back to dashboard
+        </a>
+      {% endif %}
+    </div>
+  </header>
+
+  <div class="program-detail-grid">
+    <div class="program-detail-main">
+      <section class="card ui-card program-detail-card program-about-card" style="--stagger:0;">
+        <header class="program-detail-card-heading">
+          <span class="program-detail-icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h8l5 5v13H6z"/><path d="M14 3v6h5M9 13h7M9 17h7"/></svg></span>
+          <h2>About this program</h2>
+        </header>
+        <p class="program-about-label">Description</p>
+        {% if program.description %}
+          <p class="program-about-description">{{ program.description }}</p>
+        {% else %}
+          <p class="program-about-description is-empty">No description provided.</p>
+        {% endif %}
+      </section>
+
+      <section class="card ui-card program-detail-card program-hosts-card" style="--stagger:1;">
+        <header class="program-detail-card-heading">
+          <span class="program-detail-icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m6-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm10 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+          <h2>Program Hosts</h2>
+        </header>
+        {% if hosts %}
+          <ul class="program-host-list">
+            {% for host in hosts %}
+              <li class="program-host-row">
+                <span class="program-host-avatar" aria-hidden="true">{{ host.full_name.split()[0][0]|upper if host.full_name else '?' }}{% if host.full_name and host.full_name.split()|length > 1 %}{{ host.full_name.split()[-1][0]|upper }}{% endif %}</span>
+                <div class="program-host-copy">
+                  <span class="program-host-name">{{ host.full_name or '—' }}</span>
+                  {% if host.role == 'CO_HOST' %}
+                    <span class="program-host-role">Co-Host</span>
+                    <span class="visually-hidden">Co-Host</span>
+                  {% else %}
+                    <span class="program-host-role">Host</span>
+                    <span class="visually-hidden">Program Host</span>
+                  {% endif %}
+                  {% if is_event_manager or is_program_host %}
+                    <span class="program-host-email">{{ host.email }}</span>
+                  {% endif %}
+                </div>
+                {% if is_event_manager %}
+                  <form method="post" action="{{ url_for('manage_program_hosts', program_id=program.id) }}">
+                    <input type="hidden" name="action" value="remove">
+                    <input type="hidden" name="role" value="{{ host.role }}">
+                    <button class="danger" type="submit">Remove</button>
+                  </form>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="empty-state program-host-empty">No Program Host is assigned.</p>
+        {% endif %}
+        {% if is_event_manager %}
+          <section class="program-host-form">
+            <h2>Assign a Host or Co-Host</h2>
+            <form method="post" action="{{ url_for('manage_program_hosts', program_id=program.id) }}" class="stack">
+              <input type="hidden" name="action" value="assign">
+              <label>Role<select name="role">
+                  <option value="HOST">Program Host</option>
+                  <option value="CO_HOST">Co-Host</option>
+                </select>
+              </label>
+              <label>Registered user's email<input type="email" name="email" required>
+              </label>
+              <button type="submit">Assign</button>
+            </form>
+          </section>
+        {% endif %}
+      </section>
+
+      {% if can_manage %}
+        <div class="program-actions">
+          <a class="button" href="{{ url_for('edit_program', program_id=program.id) }}">Edit program</a>
+          {% if program.status != 'CANCELLED' %}
+            <form method="post" action="{{ url_for('cancel_program', program_id=program.id) }}" onsubmit="return confirm('Cancel this program? It will remain recorded as CANCELLED.')">
+              <button class="danger" type="submit">Cancel program</button>
+            </form>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+
+    <aside class="program-detail-sidebar">
+      <section class="card ui-card program-detail-card program-key-facts-card" style="--stagger:2;">
+        <header class="program-detail-card-heading">
+          <span class="program-detail-icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7h.01"/></svg></span>
+          <h2>Key facts</h2>
+        </header>
+        <div class="program-key-facts">
+          <div class="program-key-fact">
+            <span class="program-fact-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></span>
+            <span><span class="program-fact-label">When</span><span class="program-fact-value">{{ friendly_range(program.start_at, program.end_at) }}</span></span>
+          </div>
+          <div class="program-key-fact">
+            <span class="program-fact-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+            <span><span class="program-fact-label">Registration deadline</span><span class="program-fact-value">{{ friendly_datetime(program.registration_deadline) }}</span></span>
+          </div>
+          <div class="program-key-fact">
+            <span class="program-fact-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
+            <span><span class="program-fact-label">Venue</span><span class="program-fact-value">{{ program.venue or '—' }}</span></span>
+          </div>
+          <div class="program-key-fact">
+            <span class="program-fact-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18m-12 5h4"/></svg></span>
+            <span><span class="program-fact-label">Fee</span><span class="program-fact-value">{% if program.fee|float == 0 %}Free{% else %}₹{{ '{:,.2f}'.format(program.fee|float) }}{% endif %}</span></span>
+          </div>
+          {% if program.participation_mode == 'TEAM' %}
+            <div class="program-key-fact">
+              <span class="program-fact-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m6-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm10 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+              <span><span class="program-fact-label">Team size</span><span class="program-fact-value">{{ program.team_size or '—' }}</span></span>
+            </div>
+          {% endif %}
+        </div>
+      </section>
+
+      {% if registration %}
+        <section class="card ui-card program-registration-panel is-registered" style="--stagger:3;">
+          <header class="program-registration-heading">
+            <span class="program-registration-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></span>
+            <h2>Your registration</h2>
+          </header>
+          <p>{{ registration.participant_type|title }} participant · {{ registration.registration_mode|title }} program</p>
+          <a class="ui-btn ui-btn--secondary" href="{{ url_for('participant_registration_detail', registration_id=registration.id) }}">View registration</a>
+          {% if program.participation_mode == 'TEAM' %}
+            <a class="ui-btn ui-btn--primary" href="{{ url_for('participant_program_teams', program_id=program.id) }}">Participant teams ({{ participant_team_count }})</a>
+          {% endif %}
+        </section>
+      {% elif registration_open %}
+        <section class="card ui-card program-registration-panel is-open" style="--stagger:3;">
+          <header class="program-registration-heading">
+            <span class="program-registration-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></span>
+            <h2>Registration is open</h2>
+          </header>
+          <p>
+            {% if program.participation_mode == 'TEAM' %}
+              Register first to create a participant team or join one through its captain.
+            {% else %}
+              Register as an individual participant.
+            {% endif %}
+          </p>
+          <p class="program-registration-closes">Closes {{ friendly_datetime(program.registration_deadline).split(',')[0] }}</p>
+          <a class="ui-btn ui-btn--primary program-register-button" href="{{ url_for('register_for_program', program_id=program.id) }}">
+            Register for this program
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
+          </a>
+        </section>
+      {% else %}
+        <section class="card ui-card program-registration-panel is-closed" style="--stagger:3">
+          <header class="program-registration-heading">
+            <span class="program-registration-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+            <p>Registration is closed for this program.</p>
+          </header>
+        </section>
+      {% endif %}
+    </aside>
+  </div>
+</div>
+{% endblock %}

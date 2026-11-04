@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}
+  Gate verification · {{ event.event_name }}
+{% endblock %}
+{% block content %}
+  <section class="welcome">
+    <p class="eyebrow">GATE STAFF</p>
+    <h1>{{ event.event_name }}</h1>
+    <p>Choose a program to verify participant entry. Your access is limited to this event's gate.</p>
+  </section>
+  <section class="card wide">
+    <h2>Programs</h2>
+    {% if programs %}
+      <div class="program-list">
+        {% for program in programs %}
+          <article class="program-card">
+            <div>
+              <p class="eyebrow">{{ program.status }}</p>
+              <h3>{{ program.program_name }}</h3>
+              <p>{{ program.start_at }} · {{ program.venue }}</p>
+            </div>
+            <a class="button" href="{{ url_for('gate_program', event_id=event.id, program_id=program.id) }}">Verify entry</a>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="empty-state">No programs are listed for this event.</p>
+    {% endif %}
+  </section>
+{% endblock %}

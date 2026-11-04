@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% block title %}Accommodation · {{ event.event_name }}{% endblock %}
+{% block content %}
+  {% macro status_badge(label, value) %}
+    {% set v = (value|string)|lower %}
+    {% if v in ['success','registered','active','allocated','ongoing','entered','verified','approved'] %}
+      {% set tone = 'success' %}
+    {% elif v in ['pending','upcoming','open','not yet allocated'] %}
+      {% set tone = 'warning' %}
+    {% elif v in ['failed','cancelled','rejected','closed','revoked'] %}
+      {% set tone = 'error' %}
+    {% else %}
+      {% set tone = 'neutral' %}
+    {% endif %}
+    <span class="dashboard-badge dashboard-badge--{{ tone }}">{{ label }}</span>
+  {% endmacro %}
+  {% set participant_count = participants|length %}
+  {% set requested_count = participants|selectattr('accommodation_required')|list|length %}
+  {% set allocated_count = participants|selectattr('allocation_id')|list|length %}
+
+  <header class="accommodation-heading">
+    <a class="accommodation-back-link" href="{{ url_for('convener_event_dashboard', event_id=event.id) }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5m7 7-7-7 7-7"></path></svg>
+      Back to Event Dashboard
+    </a>
+    <h1>{{ event.event_name }}</h1>
+    <p>Assign, review, and update accommodation for registered participants.</p>
+  </header>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="notice {{ category }}" role="status">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          {% if category == 'success' %}<circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.5 2.5L16.5 9"></path>{% else %}<circle cx="12" cy="12" r="9"></circle><path d="M12 8v5m0 3h.01"></path>{% endif %}
+        </svg>
+        <span>{{ message }}</span>
+      </div>
+    {% endfor %}
+  {% endwith %}
+
+  <section class="dashboard-stat-grid accommodation-stats" aria-label="Accommodation summary">
+    <div class="dashboard-stat-card"><span class="dashboard-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m6-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm10 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span><span class="dashboard-stat-value">{{ participant_count }}</span><span class="dashboard-stat-label">Participants</span></div>
+    <div class="dashboard-stat-card"><span class="dashboard-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10h18M5 6h14a2 2 0 0 1 2 2v11H3V8a2 2 0 0 1 2-2Zm3-3v6m8-6v6"></path></svg></span><span class="dashboard-stat-value">{{ requested_count }}</span><span class="dashboard-stat-label">Requested</span></div>
+    <div class="dashboard-stat-card"><span class="dashboard-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-5h6v5M9 9h.01M15 9h.01"></path></svg></span><span class="dashboard-stat-value">{{ allocated_count }}</span><span class="dashboard-stat-label">Allocated</span></div>
+  </section>
+
+  <div class="accommodation-layout">
+    <section class="card accommodation-list-card">
+      <div class="dashboard-section-heading"><h2>Participant allocations</h2><span class="dashboard-count">{{ participant_count }}</span></div>
+      {% if participants %}
+        <div class="accommodation-participant-list">
+          {% for participant in participants %}
+            {% set name_parts = participant.full_name.split() %}
+            {% set initials = (name_parts[0][0] ~ (name_parts[-1][0] if name_parts|length > 1 else ''))|upper %}
+            <article class="allocation-row">
+              <div class="allocation-heading">
+                <span class="allocation-avatar" aria-hidden="true">{{ initials }}</span>
+                <div class="allocation-person">
+                  <div class="allocation-name-line">
+                    <h3>{{ participant.full_name }}</h3>
+                    <div class="allocation-row-actions">
+                      {% if participant.allocation_id %}
+                        {{ status_badge('Allocated', 'allocated') }}
+                        <button class="button secondary allocation-edit-toggle" type="button" aria-expanded="false" aria-controls="allocation-edit-panel-{{ participant.allocation_id }}">Edit</button>
+                      {% elif participant.accommodation_required %}
+                        {{ status_badge('Not Yet Allocated', 'not yet allocated') }}
+                      {% else %}
+                        {{ status_badge('Not requested', 'neutral') }}
+                      {% endif %}
+                    </div>
+                  </div>
+                  <p>{{ participant.email }}</p>
+                </div>
+              </div>
+
+              {% if participant.allocation_id %}
+                <dl class="allocation-summary">
+                  <div><dt><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-5h6v5"></path></svg>Accommodation:</dt><dd>{{ participant.accommodation_name }}</dd></div>
+                  <div><dt><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4zM9 4v16m6-16v16"></path></svg>Room:</dt><dd>{{ participant.room_details }}</dd></div>
+                </dl>
+                <div class="allocation-edit-panel" id="allocation-edit-panel-{{ participant.allocation_id }}" hidden>
+                  <form id="allocation-edit-form-{{ participant.allocation_id }}" method="post" action="{{ url_for('edit_accommodation_allocation', event_id=event.id, allocation_id=participant.allocation_id) }}" class="stack allocation-edit-form">
+                    <div class="allocation-edit-form-heading"><h4>Update allocation</h4><button class="button secondary" data-allocation-edit-cancel type="button">Cancel</button></div>
+                    <label><span>Accommodation name <i aria-hidden="true">*</i></span><input name="accommodation_name" maxlength="160" value="{{ participant.accommodation_name }}" placeholder="Enter the accommodation name" required></label>
+                    <label><span>Room details <i aria-hidden="true">*</i></span><input name="room_details" maxlength="120" value="{{ participant.room_details }}" placeholder="Enter room details (for example Block A, Room 204)" required></label>
+                    <div class="form-row">
+                      <label><span>Stay from <i aria-hidden="true">*</i></span><input type="date" name="stay_from" value="{{ participant.stay_from }}" required></label>
+                      <label><span>Stay until <i aria-hidden="true">*</i></span><input type="date" name="stay_until" value="{{ participant.stay_until }}" required></label>
+                    </div>
+                    <label class="allocation-notes-field">Notes<textarea name="notes" maxlength="1000" rows="3" placeholder="Add any notes (optional)">{{ participant.notes or '' }}</textarea></label>
+                  </form>
+                  <div class="allocation-edit-actions">
+                    <button class="button" type="submit" form="allocation-edit-form-{{ participant.allocation_id }}">Save changes</button>
+                    <form method="post" action="{{ url_for('remove_accommodation_allocation', event_id=event.id, allocation_id=participant.allocation_id) }}" class="remove-allocation">
+                      <button class="danger" type="submit">Remove allocation</button>
+                    </form>
+                  </div>
+                </div>
+              {% else %}
+                {% if participant.accommodation_required %}
+                  <p class="empty-state">No accommodation has been assigned to this participant.</p>
+                {% else %}
+                  <p class="empty-state">This participant did not request accommodation.</p>
+                {% endif %}
+              {% endif %}
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="empty-state">There are no registered participants for this event yet.</p>
+      {% endif %}
+    </section>
+
+    <aside class="card accommodation-create-card">
+      <h2>Create an allocation</h2>
+      <p class="accommodation-form-intro">Select a registered participant and enter their accommodation details.</p>
+      <form method="post" action="{{ url_for('create_accommodation_allocation', event_id=event.id) }}" class="stack accommodation-create-form">
+        <label><span>Participant <i aria-hidden="true">*</i></span>
+          <select name="user_id" required>
+            <option value="">Choose a participant</option>
+            {% for participant in participants %}
+              {% if not participant.allocation_id and participant.accommodation_required %}
+                <option value="{{ participant.user_id }}">{{ participant.full_name }} · {{ participant.email }}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+        </label>
+        <label><span>Accommodation name <i aria-hidden="true">*</i></span><input name="accommodation_name" maxlength="160" placeholder="Enter the accommodation name" required></label>
+        <label><span>Room details <i aria-hidden="true">*</i></span><input name="room_details" maxlength="120" placeholder="Enter room details (for example Block A, Room 204)" required></label>
+        <div class="form-row">
+          <label><span>Stay from <i aria-hidden="true">*</i></span><input type="date" name="stay_from" required></label>
+          <label><span>Stay until <i aria-hidden="true">*</i></span><input type="date" name="stay_until" required></label>
+        </div>
+        <label>Notes<textarea name="notes" maxlength="1000" rows="3" placeholder="Add any notes (optional)"></textarea></label>
+        <button type="submit">Save allocation</button>
+      </form>
+    </aside>
+  </div>
+{% endblock %}
+{% block scripts %}
+  <script>
+    document.querySelectorAll('.allocation-edit-toggle').forEach((button) => {
+      button.addEventListener('click', () => {
+        const panel = document.getElementById(button.getAttribute('aria-controls'));
+        const expanded = button.getAttribute('aria-expanded') === 'true';
+        panel.hidden = expanded;
+        button.setAttribute('aria-expanded', String(!expanded));
+      });
+    });
+    document.querySelectorAll('[data-allocation-edit-cancel]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const panel = button.closest('.allocation-edit-panel');
+        const toggle = button.closest('.allocation-row').querySelector('.allocation-edit-toggle');
+        panel.hidden = true;
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.focus();
+      });
+    });
+    document.querySelectorAll('.accommodation-event-page > .notice.success, .accommodation-event-page > .notice.error').forEach((notice) => {
+      const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      icon.setAttribute('class', 'profile-flash-icon');
+      icon.setAttribute('viewBox', '0 0 24 24');
+      icon.setAttribute('fill', 'none');
+      icon.setAttribute('stroke', 'currentColor');
+      icon.setAttribute('stroke-width', '1.8');
+      icon.setAttribute('stroke-linecap', 'round');
+      icon.setAttribute('stroke-linejoin', 'round');
+      icon.setAttribute('aria-hidden', 'true');
+      icon.setAttribute('focusable', 'false');
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', '12'); circle.setAttribute('cy', '12'); circle.setAttribute('r', '9'); icon.append(circle);
+      const mark = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      mark.setAttribute('d', notice.classList.contains('success') ? 'm8 12 2.5 2.5L16.5 9' : 'M12 8v5m0 3h.01');
+      icon.append(mark); notice.prepend(icon);
+    });
+  </script>
+{% endblock %}

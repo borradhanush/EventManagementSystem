@@ -1,0 +1,534 @@
+.meeting-panel,.meeting-form,.meeting-detail {
+    margin: 24px 0
+}
+.meeting-list {
+    display: grid;
+    gap: 14px
+}
+.meeting-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 18px;
+    border: 1px solid #dce4ee;
+    border-radius: 12px;
+    background: #fff
+}
+.meeting-card h3 {
+    margin: 4px 0
+}
+.meeting-card p {
+    margin: 5px 0
+}
+.meeting-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap
+}
+.meeting-actions form {
+    margin: 0
+}
+.meeting-form fieldset {
+    border: 1px solid #dce4ee;
+    border-radius: 10px;
+    padding: 14px
+}
+.meeting-form legend {
+    font-weight: 700;
+    padding: 0 6px
+}
+.meeting-form .form-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr))
+}
+.meeting-select-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(240px,1fr));
+    gap: 8px
+}
+.meeting-select-list label {
+    display: flex;
+    gap: 9px;
+    align-items: flex-start;
+    padding: 8px;
+    border-radius: 8px;
+    background: #f6f8fb
+}
+.meeting-select-list input {
+    margin-top: 3px
+}
+.meeting-detail {
+    max-width: 760px
+}
+.meeting-detail p {
+    white-space: pre-wrap
+}
+@media(max-width:700px) {
+    .meeting-form .form-row {
+        grid-template-columns: 1fr
+    }
+    .meeting-card {
+        align-items: flex-start;
+        flex-direction: column
+    }
+    .meeting-actions {
+        width: 100%
+    }
+}
+
+/* Convener Meetings page and its sibling scheduling form. */
+.event-meetings-page .meeting-page {
+    width:100%;
+    min-width:0
+}
+
+.event-meetings-page .meeting-page-header {
+    margin-bottom:26px
+}
+
+.event-meetings-page .meeting-page-topline {
+    display:flex;
+    min-width:0;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:18px
+}
+
+.event-meetings-page .meeting-breadcrumb {
+    display:flex;
+    min-width:0;
+    align-items:center;
+    gap:7px;
+    color:#4b5563;
+    font-size:14px;
+    flex-wrap:wrap
+}
+
+.event-meetings-page .meeting-breadcrumb a {
+    color:#4338ca;
+    text-decoration:none
+}
+
+.event-meetings-page .meeting-breadcrumb a:hover {
+    color:#312e81;
+    text-decoration:underline
+}
+
+.event-meetings-page .meeting-breadcrumb svg {
+    width:15px;
+    height:15px;
+    flex:0 0 auto;
+    color:#6b7280
+}
+
+.event-meetings-page .meeting-breadcrumb [aria-current="page"] {
+    color:#374151;
+    font-weight:600
+}
+
+.event-meetings-page .meeting-back-link {
+    flex:0 0 auto
+}
+
+.event-meetings-page .meeting-back-link svg {
+    width:17px;
+    height:17px
+}
+
+.event-meetings-page .meeting-title-row {
+    gap:12px
+}
+
+.event-meetings-page .meeting-page-subtitle {
+    max-width:640px;
+    margin:8px 0 0;
+    color:#4b5563;
+    font-size:15px;
+    line-height:1.6
+}
+
+.event-meetings-page .meeting-panel {
+    width:100%;
+    max-width:none;
+    margin:0;
+    animation:meeting-card-appear 250ms ease both
+}
+
+.event-meetings-page .meeting-card-heading {
+    margin-bottom:0
+}
+
+.event-meetings-page .meeting-card-heading .convener-card-title h2 {
+    font-size:20px
+}
+
+.event-meetings-page .meeting-card-heading .convener-header-action {
+    min-height:40px
+}
+
+.event-meetings-page .meeting-card-divider {
+    margin:20px 0;
+    border-top:1px solid var(--convener-border)
+}
+
+.event-meetings-page .meeting-list {
+    display:grid;
+    gap:12px
+}
+
+.event-meetings-page .meeting-row {
+    display:grid;
+    grid-template-columns:56px minmax(0,1fr) auto;
+    align-items:center;
+    gap:16px;
+    min-width:0;
+    margin:0;
+    padding:16px;
+    border:1px solid var(--convener-border);
+    border-radius:12px;
+    background:var(--convener-card);
+    transition:background-color 150ms ease,border-color 150ms ease
+}
+
+.event-meetings-page .meeting-row:hover {
+    border-color:#d6dbea;
+    background:#f9fafb
+}
+
+.event-meetings-page .meeting-date-tile {
+    display:grid;
+    width:56px;
+    min-height:62px;
+    align-content:center;
+    justify-items:center;
+    gap:1px;
+    border:1px solid #e0e7ff;
+    border-radius:10px;
+    background:var(--convener-primary-tint);
+    color:#3730a3
+}
+
+.event-meetings-page .meeting-date-tile span {
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.07em
+}
+
+.event-meetings-page .meeting-date-tile strong {
+    color:#111827;
+    font-size:21px;
+    font-weight:700;
+    line-height:1.1
+}
+
+.event-meetings-page .meeting-copy {
+    min-width:0;
+    overflow-wrap:anywhere
+}
+
+.event-meetings-page .meeting-context {
+    margin:0 0 3px;
+    color:#4338ca;
+    font-size:12px;
+    font-weight:600
+}
+
+.event-meetings-page .meeting-copy h3 {
+    margin:0;
+    color:var(--convener-text);
+    font-size:16px;
+    font-weight:600;
+    line-height:1.4
+}
+
+.event-meetings-page .meeting-copy p {
+    line-height:1.5
+}
+
+.event-meetings-page .meeting-meta {
+    display:flex;
+    gap:5px 14px;
+    margin:5px 0 0;
+    color:#4b5563;
+    font-size:13px;
+    flex-wrap:wrap
+}
+
+.event-meetings-page .meeting-recipients {
+    margin:4px 0 0;
+    color:#4b5563;
+    font-size:13px
+}
+
+.event-meetings-page .meeting-actions {
+    display:flex;
+    align-items:center;
+    gap:8px
+}
+
+.event-meetings-page .meeting-actions form {
+    display:flex;
+    margin:0
+}
+
+.event-meetings-page .meeting-actions .convener-button {
+    min-height:38px;
+    padding:7px 11px;
+    white-space:nowrap
+}
+
+.event-meetings-page .meeting-empty-state {
+    min-height:0;
+    gap:10px;
+    margin:0;
+    padding:48px 24px;
+    border-color:var(--convener-input-border);
+    background:#f9fafb
+}
+
+.event-meetings-page .meeting-empty-icon {
+    display:grid;
+    width:48px;
+    height:48px;
+    place-items:center;
+    border-radius:50%;
+    background:var(--convener-primary-tint);
+    color:var(--convener-primary)
+}
+
+.event-meetings-page .meeting-empty-state .meeting-empty-icon svg {
+    width:24px;
+    height:24px;
+    color:inherit
+}
+
+.event-meetings-page .meeting-empty-state h3 {
+    margin:2px 0 0;
+    color:var(--convener-text);
+    font-size:16px;
+    font-weight:600;
+    line-height:1.4
+}
+
+.event-meetings-page .meeting-empty-state p {
+    max-width:520px;
+    margin:0;
+    color:#4b5563;
+    font-size:14px;
+    font-weight:400
+}
+
+.event-meetings-page .meeting-empty-state .convener-button {
+    min-height:44px;
+    margin-top:6px
+}
+
+.event-meetings-page .meeting-form-intro {
+    margin:0 0 22px;
+    padding:0
+}
+
+.event-meetings-page .meeting-form-intro .eyebrow {
+    color:#4338ca
+}
+
+.event-meetings-page .meeting-form-intro h1 {
+    color:var(--convener-text);
+    font-size:32px;
+    font-weight:700
+}
+
+.event-meetings-page .meeting-form {
+    display:grid;
+    width:100%;
+    max-width:none;
+    gap:20px;
+    margin:0
+}
+
+.event-meetings-page .meeting-form .form-row {
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:20px
+}
+
+.event-meetings-page .meeting-form .inline-actions {
+    justify-content:flex-end
+}
+
+.event-meetings-page .meeting-recipient-fieldset {
+    min-width:0;
+    margin:0;
+    padding:16px;
+    border:1px solid var(--convener-border);
+    border-radius:12px;
+    background:#fff
+}
+
+.event-meetings-page .meeting-recipient-fieldset legend {
+    padding:0 6px;
+    color:var(--convener-text);
+    font-size:14px;
+    font-weight:600
+}
+
+.event-meetings-page .meeting-recipient-fieldset > .empty-state {
+    display:flex;
+    min-height:82px;
+    align-items:center;
+    margin:6px 0 2px;
+    padding:20px 16px;
+    border:1px dashed #cbd5e1;
+    border-radius:12px;
+    background:#fafbfd;
+    color:#5e6b80;
+    font-size:18px;
+    font-weight:400;
+    line-height:1.45
+}
+
+.event-meetings-page .meeting-select-list {
+    max-height:260px;
+    overflow:auto;
+    padding:4px;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    background:#f9fafb
+}
+
+.event-meetings-page .meeting-select-list label {
+    display:flex;
+    min-height:44px;
+    align-items:center;
+    gap:10px;
+    padding:9px 10px;
+    border:1px solid transparent;
+    background:#fff;
+    color:#374151;
+    font-size:14px;
+    font-weight:500;
+    line-height:1.4;
+    overflow-wrap:anywhere
+}
+
+.event-meetings-page .meeting-select-list label:hover {
+    border-color:#e0e7ff;
+    background:#eef2ff
+}
+
+.event-meetings-page .meeting-select-list input[type="checkbox"] {
+    width:18px;
+    height:18px;
+    flex:0 0 auto;
+    accent-color:var(--convener-primary)
+}
+
+.event-meetings-page .meeting-select-list small {
+    display:block;
+    margin-top:2px;
+    color:#5f6b80;
+    font-size:12px;
+    font-weight:400
+}
+
+.event-meetings-page :is(a,button,input,select,textarea):focus-visible {
+    outline:3px solid rgba(79,70,229,.72);
+    outline-offset:3px
+}
+
+@keyframes meeting-card-appear {
+    from { opacity:0; transform:translateY(8px) }
+    to { opacity:1; transform:translateY(0) }
+}
+
+@media(max-width:767px) {
+    .event-meetings-page .meeting-page-topline {
+        align-items:stretch;
+        flex-direction:column-reverse;
+        gap:10px;
+        margin-bottom:16px
+    }
+
+    .event-meetings-page .meeting-back-link {
+        width:100%;
+        min-height:44px
+    }
+
+    .event-meetings-page .meeting-card-heading {
+        align-items:flex-start;
+        flex-wrap:wrap
+    }
+
+    .event-meetings-page .meeting-card-heading .convener-card-title {
+        flex-basis:calc(100% - 56px)
+    }
+
+    .event-meetings-page .meeting-card-heading .convener-header-action {
+        width:100%;
+        min-height:44px;
+        margin:8px 0 0
+    }
+
+    .event-meetings-page .meeting-row {
+        grid-template-columns:48px minmax(0,1fr);
+        align-items:start;
+        gap:12px
+    }
+
+    .event-meetings-page .meeting-date-tile {
+        width:48px;
+        min-height:56px
+    }
+
+    .event-meetings-page .meeting-actions {
+        grid-column:1 / -1;
+        flex-wrap:wrap
+    }
+
+    .event-meetings-page .meeting-actions>* {
+        flex:1 1 120px
+    }
+
+    .event-meetings-page .meeting-actions .convener-button {
+        width:100%;
+        min-height:44px
+    }
+
+    .event-meetings-page .meeting-form-intro h1 {
+        font-size:28px
+    }
+
+    .event-meetings-page .meeting-form .form-row {
+        grid-template-columns:minmax(0,1fr)
+    }
+
+    .event-meetings-page .meeting-select-list label {
+        min-height:44px
+    }
+
+    .event-meetings-page .meeting-form .inline-actions {
+        align-items:stretch;
+        flex-direction:column
+    }
+
+    .event-meetings-page .meeting-form .inline-actions>* {
+        width:100%;
+        min-height:44px
+    }
+}
+
+@media(max-width:639px) {
+    .event-meetings-page .meeting-empty-state {
+        padding:40px 18px
+    }
+}
+
+@media(prefers-reduced-motion:reduce) {
+    .event-meetings-page,
+    .event-meetings-page * {
+        animation:none!important;
+        transition:none!important
+    }
+}

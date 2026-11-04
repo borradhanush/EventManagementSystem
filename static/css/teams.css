@@ -1,0 +1,66 @@
+.team-management,.convener-group {
+    margin-top: 28px;
+    padding-top: 22px;
+    border-top: 1px solid #e8ebf2
+}
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+    gap: 16px;
+    margin: 18px 0 28px
+}
+.team-card {
+    padding: 18px;
+    border: 1px solid #e4e8f1;
+    border-radius: 10px;
+    background: #fafbfe
+}
+.team-card h3 {
+    margin: 0 0 8px
+}
+.team-card p {
+    margin: 7px 0
+}
+.team-create-form {
+    display: grid;
+    gap: 14px;
+    margin-top: 16px;
+    max-width: 700px
+}
+.team-create-form form {
+    display: grid;
+    gap: 14px
+}
+.team-member-list,.co-convener-list,.team-links {
+    list-style: none;
+    padding: 0;
+    margin: 14px 0
+}
+.team-member-list li,.co-convener-list li,.team-links li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid #e9edf4
+}
+.team-member-list li form,.co-convener-list li form {
+    margin: 0
+}
+.team-links li {
+    align-items: flex-start;
+    flex-direction: column
+}
+.team-links span {
+    color: #68748a;
+    font-size: 14px
+}
+.leave-team-form {
+    margin-top: 24px
+}
+@media(max-width:680px) {
+    .team-member-list li,.co-convener-list li {
+        align-items: flex-start;
+        flex-direction: column
+    }
+}

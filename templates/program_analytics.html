@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}
+  Program analytics · {{ program.program_name }}
+{% endblock %}
+{% block content %}
+  <section class="welcome">
+    <p class="eyebrow">PROGRAM ANALYTICS · {{ program.event_name }}</p>
+    <h1>{{ program.program_name }}</h1>
+    <p>{{ program.participation_mode }} · {{ program.status }}</p>
+  </section>
+  <section class="analytics-section">
+    <div class="analytics-grid">
+      <article class="analytics-card">
+        <span>Registrations</span><strong>{{ analytics.registrations.total }}</strong>
+      </article>
+      <article class="analytics-card">
+        <span>University participants</span><strong>{{ analytics.registrations.university }}</strong>
+      </article>
+      <article class="analytics-card">
+        <span>Outsider participants</span><strong>{{ analytics.registrations.outsider }}</strong>
+      </article>
+      {% if program.participation_mode == 'TEAM' %}
+        <article class="analytics-card">
+          <span>Active participant teams</span><strong>{{ analytics.team_count }}</strong>
+        </article>
+      {% endif %}
+    </div>
+  </section>
+  <section class="analytics-section">
+    <h2>Mock payments</h2>
+    <p class="analytics-note">Simulated amounts only. These are not real financial transactions.</p>
+    <div class="analytics-grid">
+      <article class="analytics-card">
+        <span>Successful mock payments</span><strong>{{ analytics.payments.successful_count }}</strong>
+      </article>
+      <article class="analytics-card">
+        <span>Successful mock amount</span><strong>{{ '%.2f'|format(analytics.payments.amount_cents / 100) }}</strong>
+      </article>
+    </div>
+  </section>
+  <section class="analytics-section">
+    <h2>Attendance</h2>
+    <div class="analytics-grid">
+      <article class="analytics-card">
+        <span>Total entries</span><strong>{{ analytics.attendance.total }}</strong>
+      </article>
+      <article class="analytics-card">
+        <span>Face</span><strong>{{ analytics.attendance.face }}</strong>
+      </article>
+      <article class="analytics-card">
+        <span>QR</span><strong>{{ analytics.attendance.qr }}</strong>
+      </article>
+    </div>
+  </section>
+  <section class="analytics-section">
+    <h2>Related services</h2>
+    <div class="analytics-grid">
+      <article class="analytics-card">
+        <span>Accommodation allocations</span><strong>{{ analytics.accommodation_count }}</strong>
+      </article>
+      <article class="analytics-card">
+        <span>Associated meetings</span><strong>{{ analytics.meeting_count }}</strong>
+      </article>
+    </div>
+  </section>
+  <p>
+    <a class="button secondary" href="{{ url_for('event_analytics', event_id=program.event_id) }}">Back to event analytics</a>
+  </p>
+{% endblock %}

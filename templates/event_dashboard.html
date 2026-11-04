@@ -1,0 +1,257 @@
+{% extends 'base.html' %}
+{% block title %}
+  Event Dashboard
+{% endblock %}
+{% block content %}
+  <div class="convener-event-dashboard">
+    <header class="convener-event-header">
+      <a class="convener-back-link" href="{{ url_for('dashboard') }}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5m7 7-7-7 7-7"></path></svg>
+        Back to Dashboard
+      </a>
+      <div class="convener-title-row">
+        <h1>{{ event.event_name }}</h1>
+        <div class="convener-event-badges">
+          <span class="convener-status-badge convener-status-{{ event.status|lower }}"><span aria-hidden="true"></span>{{ event.status|title }}</span>
+          {% if event.visibility == 'PUBLIC' %}
+            <span class="convener-visibility-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a15 15 0 0 1 0 18m0-18a15 15 0 0 0 0 18"></path></svg>Public</span>
+          {% else %}
+            <span class="convener-visibility-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>Private</span>
+          {% endif %}
+          {% if is_primary %}
+            <span class="convener-role-badge">Primary Convener</span>
+          {% else %}
+            <span class="convener-role-badge">Co-Convener</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="convener-event-meta">
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M9 9h.01M15 9h.01"></path></svg>{{ event.organization_university }}</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>{{ event.venue }}</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18"></path></svg>{{ event.start_date }} · {{ event.end_date }}</span>
+      </div>
+    </header>
+
+    <div class="convener-dashboard-layout">
+      <nav class="event-section-nav" aria-label="On this page">
+        <h2>On this page</h2>
+        <a class="event-section-link" href="#event-details" aria-current="location">Event Details</a>
+        {% if is_primary %}<a class="event-section-link" href="#convener-group">Convener Group</a>{% endif %}
+        <a class="event-section-link" href="#gate-staff">Gate Staff</a>
+        <a class="event-section-link" href="#accommodation">Accommodation</a>
+        <a class="event-section-link" href="#programs">Programs</a>
+        <a class="event-section-link" href="#analytics">Analytics</a>
+        <a class="event-section-link" href="#meetings">Meetings</a>
+        <a class="event-section-link" href="#teams">Teams</a>
+        {% if is_primary %}<a class="event-section-link" href="#danger-zone">Danger zone</a>{% endif %}
+      </nav>
+
+      <div class="event-dashboard-sections">
+        <section class="convener-section-card" id="event-details">
+          <div class="convener-card-heading">
+            <span class="convener-icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M9 9h.01M15 9h.01"></path></svg></span>
+            <div class="convener-card-title"><h2>Event Details</h2><p>Update the event information and visibility.</p></div>
+            <span class="convener-created-meta" data-created-at="{{ event.created_at }}">Created {{ event.created_at }}</span>
+          </div>
+          <form method="post" class="event-details-form">
+            <div class="event-form-grid">
+              <label class="event-field event-field-full">Event name<input name="event_name" required value="{{ event.event_name }}"></label>
+              <label class="event-field">Organization / university<input name="organization_university" required value="{{ event.organization_university }}"></label>
+              <label class="event-field">Event type<input name="event_type" required value="{{ event.event_type }}"></label>
+              <label class="event-field event-field-full">Description<textarea name="description" rows="4" required>{{ event.description }}</textarea></label>
+              <label class="event-field">Start date<input name="start_date" type="date" required value="{{ event.start_date }}"></label>
+              <label class="event-field">End date<input name="end_date" type="date" required value="{{ event.end_date }}"></label>
+              <label class="event-field">Venue<input name="venue" required value="{{ event.venue }}"></label>
+              <label class="event-field">Visibility<select name="visibility"><option value="PUBLIC" {% if event.visibility == 'PUBLIC' %}selected{% endif %}>Public</option><option value="PRIVATE" {% if event.visibility == 'PRIVATE' %}selected{% endif %}>Private</option></select></label>
+            </div>
+            <div class="event-form-footer"><button class="convener-button convener-button-primary" type="submit">Save event details</button></div>
+          </form>
+        </section>
+
+        {% if is_primary %}
+          <section class="convener-section-card" id="convener-group">
+            <div class="convener-card-heading">
+              <span class="convener-icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m6-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm10 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>
+              <div class="convener-card-title"><h2>Convener Group</h2><p>Only the Primary Convener can manage Co-Convener assignments.</p></div>
+            </div>
+            {% if co_conveners %}
+              <ul class="convener-people-list">
+                {% for person in co_conveners %}
+                  <li class="convener-person-row"><span class="convener-avatar" aria-hidden="true">{{ person.full_name[:1]|upper }}</span><span class="convener-person-copy"><strong>{{ person.full_name }}</strong><span>{{ person.email }}</span></span><span class="convener-person-role">Co-Convener</span><form method="post" action="{{ url_for('remove_co_convener', event_id=event.id, co_user_id=person.id) }}"><button class="convener-button convener-button-danger" type="submit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m4 4v6m6-6v6"></path></svg>Remove</button></form></li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <div class="convener-empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m6-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm10 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg><p>No Co-Conveners assigned.</p></div>
+            {% endif %}
+            <form method="post" action="{{ url_for('add_co_convener', event_id=event.id) }}" class="convener-add-form">
+              <label class="event-field">Registered user's email<input type="email" name="email" required placeholder="name@example.edu"></label>
+              <button class="convener-button convener-button-primary" type="submit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 5v14m-7-7h14"></path></svg>Add Co-Convener</button>
+            </form>
+          </section>
+        {% endif %}
+
+        <section class="convener-section-card" id="gate-staff">
+          <div class="convener-card-heading"><span class="convener-icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5l8-3 8 3v16M8 9h.01M16 9h.01M8 13h.01M16 13h.01M10 21v-4h4v4"></path></svg></span><div class="convener-card-title"><h2>Gate Staff</h2><p>Assigned users can verify entry for this event only.</p></div></div>
+          {% if gate_staff %}
+            <ul class="convener-people-list">
+              {% for person in gate_staff %}
+                <li class="convener-person-row"><span class="convener-avatar" aria-hidden="true">{{ person.full_name[:1]|upper }}</span><span class="convener-person-copy"><strong>{{ person.full_name }}</strong><span>{{ person.email }}</span></span><span class="convener-person-role">Gate Staff</span><div class="convener-person-actions"><a class="convener-button convener-button-secondary" href="{{ url_for('gate_event', event_id=event.id) }}">Gate page</a><form method="post" action="{{ url_for('manage_gate_staff', event_id=event.id) }}"><input type="hidden" name="action" value="remove"><input type="hidden" name="user_id" value="{{ person.id }}"><button class="convener-button convener-button-danger" type="submit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m4 4v6m6-6v6"></path></svg>Remove</button></form></div></li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <div class="convener-empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5l8-3 8 3v16M8 9h.01M16 9h.01M8 13h.01M16 13h.01M10 21v-4h4v4"></path></svg><p>No Gate Staff assigned.</p></div>
+          {% endif %}
+          <form method="post" action="{{ url_for('manage_gate_staff', event_id=event.id) }}" class="convener-add-form">
+            <label class="event-field">Registered user's email<input type="email" name="email" required placeholder="name@example.edu"></label>
+            <button class="convener-button convener-button-primary" type="submit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 5v14m-7-7h14"></path></svg>Add Gate Staff</button>
+          </form>
+        </section>
+
+        <section class="convener-section-card" id="accommodation">
+          <div class="convener-card-heading">
+            <span class="convener-icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6M9 10h.01M15 10h.01"></path></svg></span>
+            <div class="convener-card-title"><h2>Accommodation Team</h2><p>Team members can manage accommodation allocations for this event only.</p></div>
+            <a class="convener-button convener-button-secondary convener-header-action" href="{{ url_for('accommodation_event', event_id=event.id) }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4h16v16H4zM8 8h8m-8 4h8m-8 4h5"></path></svg>Open allocations</a>
+          </div>
+          {% if accommodation_team %}
+            <ul class="convener-people-list">
+              {% for person in accommodation_team %}
+                <li class="convener-person-row"><span class="convener-avatar" aria-hidden="true">{{ person.full_name[:1]|upper }}</span><span class="convener-person-copy"><strong>{{ person.full_name }}</strong><span>{{ person.email }}</span></span><span class="convener-person-role">Accommodation</span><form method="post" action="{{ url_for('manage_accommodation_team', event_id=event.id) }}"><input type="hidden" name="action" value="remove"><input type="hidden" name="user_id" value="{{ person.id }}"><button class="convener-button convener-button-danger" type="submit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m4 4v6m6-6v6"></path></svg>Remove</button></form></li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <div class="convener-empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m6-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm10 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg><p>No Accommodation Team members assigned.</p></div>
+          {% endif %}
+          <form method="post" action="{{ url_for('manage_accommodation_team', event_id=event.id) }}" class="convener-add-form">
+            <label class="event-field">Registered user's email<input type="email" name="email" required placeholder="name@example.edu"></label>
+            <button class="convener-button convener-button-primary" type="submit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 5v14m-7-7h14"></path></svg>Add Accommodation Team member</button>
+          </form>
+        </section>
+
+        <section class="convener-section-card" id="programs">
+          <div class="convener-card-heading"><span class="convener-icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18M12 13v5m-2.5-2.5h5"></path></svg></span><div class="convener-card-title"><h2>Programs</h2><p>Programs scheduled for this event.</p></div><a class="convener-button convener-button-primary convener-header-action" href="{{ url_for('create_program', event_id=event.id) }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 5v14m-7-7h14"></path></svg>Create program</a></div>
+          {% if programs %}
+            <div class="convener-program-list">
+              {% for program in programs %}
+                <article class="convener-program-row">
+                  <div class="convener-program-copy">
+                    <p class="convener-program-meta">{{ program.category }} · {{ program.participation_mode }} · {{ program.status }}</p>
+                    <h3><a href="{{ url_for('program_detail', program_id=program.id) }}">{{ program.program_name }}</a></h3>
+                    <p>{{ program.start_at }} to {{ program.end_at }} · {{ program.venue }}</p>
+                    {% if program.participation_mode == 'TEAM' %}<p>Team size: {{ program.team_size }}</p>{% endif %}
+                    <p>Fee: {{ '%.2f'|format(program.fee) }}</p>
+                  </div>
+                  <div class="convener-row-actions"><a class="convener-button convener-button-secondary" href="{{ url_for('edit_program', program_id=program.id) }}">Edit</a><a class="convener-button convener-button-secondary" href="{{ url_for('program_analytics', program_id=program.id) }}">Analytics</a></div>
+                </article>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="convener-empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18"></path></svg><p>No programs have been created for this event.</p></div>
+          {% endif %}
+        </section>
+
+        <section class="convener-section-card convener-analytics-card" id="analytics">
+          <div class="convener-card-heading"><span class="convener-icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10m8 10V4m8 16v-7M2 20h20"></path></svg></span><div class="convener-card-title"><h2>Event Analytics</h2><p>Aggregate registrations, program, simulated payment, attendance, accommodation, and meeting summaries.</p></div><a class="convener-button convener-button-secondary convener-header-action" href="{{ url_for('event_analytics', event_id=event.id) }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20V10m8 10V4m8 16v-7M2 20h20"></path></svg>View analytics</a></div>
+        </section>
+
+        <section class="convener-section-card" id="meetings">
+          <div class="convener-card-heading"><span class="convener-icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18"></path></svg></span><div class="convener-card-title"><h2>Meetings</h2><p>Schedule event or program meetings and send email invitations to selected registrations and teams.</p></div><a class="convener-button convener-button-secondary convener-header-action" href="{{ url_for('event_meetings', event_id=event.id) }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="m10 9 5 3-5 3z"></path></svg>Manage meetings</a></div>
+          {% if meetings %}
+            <ul class="convener-meeting-list">
+              {% for meeting in meetings %}
+                <li><a href="{{ url_for('event_meetings', event_id=event.id) }}">{{ meeting.title }}</a><span>{{ meeting.program_name or 'Event-level' }} · {{ meeting.meeting_date }} · {{ meeting.start_time }}–{{ meeting.end_time }}</span></li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <div class="convener-empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18"></path></svg><p>No meetings scheduled.</p></div>
+          {% endif %}
+        </section>
+
+        <section class="convener-section-card" id="teams">
+          <div class="convener-card-heading"><span class="convener-icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m6-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm10 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span><div class="convener-card-title"><h2>Event Teams</h2><p>Teams and their leaders for this event.</p></div></div>
+          {% if teams %}
+            <div class="convener-team-list">
+              {% for team in teams %}
+                <article class="convener-team-row"><span class="convener-avatar" aria-hidden="true">{{ team.leader_name[:1]|upper }}</span><div class="convener-team-copy"><h3>{{ team.team_name }}</h3><p>{{ team.description or 'No description provided.' }}</p><span><strong>Team Leader:</strong> {{ team.leader_name }} <span class="convener-team-count">{{ team.member_count }} members</span></span></div><a class="convener-button convener-button-secondary" href="{{ url_for('team_detail', team_id=team.id) }}">View team</a></article>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="convener-empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m6-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm10 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg><p>No teams have been created for this event.</p></div>
+          {% endif %}
+          <div class="convener-team-create">
+            <h3>Create a team</h3>
+            <form method="post" action="{{ url_for('create_event_team', event_id=event.id) }}" class="convener-team-create-form">
+              <label class="event-field event-field-full">Team name<input type="text" name="team_name" required maxlength="100"></label>
+              <label class="event-field event-field-full">Description (optional)<textarea name="description" rows="2"></textarea></label>
+              <label class="event-field event-field-full">Team Leader's registered email<input type="email" name="team_leader_email" required></label>
+              <div class="event-form-footer"><button class="convener-button convener-button-primary" type="submit">Create team</button></div>
+            </form>
+          </div>
+        </section>
+
+        {% if is_primary %}
+          <section class="convener-danger-card" id="danger-zone">
+            <div><h2>Danger zone</h2><strong>Delete this event</strong><p>Permanently removes this event and all its data. This action cannot be undone.</p></div>
+            <form method="post" action="{{ url_for('delete_convener_event', event_id=event.id) }}" onsubmit="return confirm('Delete this event?')"><button class="convener-button convener-button-danger" type="submit">Delete event</button></form>
+          </section>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}
+{% block scripts %}
+  <script>
+    (() => {
+      const page = document.querySelector('.convener-event-dashboard-page');
+      if (!page) return;
+      const menuButton = document.querySelector('.convener-menu-toggle');
+      const navigation = document.getElementById('site-navigation');
+      if (menuButton && navigation) {
+        const closeMenu = () => {
+          navigation.classList.remove('is-open');
+          menuButton.setAttribute('aria-expanded', 'false');
+          menuButton.setAttribute('aria-label', 'Open menu');
+        };
+        menuButton.addEventListener('click', () => {
+          const expanded = menuButton.getAttribute('aria-expanded') === 'true';
+          menuButton.setAttribute('aria-expanded', String(!expanded));
+          menuButton.setAttribute('aria-label', expanded ? 'Open menu' : 'Close menu');
+          navigation.classList.toggle('is-open', !expanded);
+        });
+        navigation.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
+        document.addEventListener('keydown', event => { if (event.key === 'Escape') closeMenu(); });
+      }
+      const created = document.querySelector('[data-created-at]');
+      if (created) {
+        const raw = created.dataset.createdAt;
+        const date = new Date(raw.replace(' ', 'T'));
+        if (!Number.isNaN(date.getTime())) {
+          const month = new Intl.DateTimeFormat('en', { month: 'short' }).format(date);
+          const hour = date.getHours() % 12 || 12;
+          const minute = String(date.getMinutes()).padStart(2, '0');
+          const period = date.getHours() >= 12 ? 'PM' : 'AM';
+          created.textContent = `Created ${date.getDate()} ${month} ${date.getFullYear()}, ${hour}:${minute} ${period}`;
+        }
+      }
+      const links = Array.from(page.querySelectorAll('.event-section-link'));
+      const sections = links.map(link => page.querySelector(link.getAttribute('href'))).filter(Boolean);
+      const updateActiveLink = () => {
+        const marker = window.scrollY + 120;
+        let active = sections[0];
+        sections.forEach(section => { if (section.getBoundingClientRect().top + window.scrollY <= marker) active = section; });
+        links.forEach(link => {
+          const selected = active && link.hash === `#${active.id}`;
+          if (selected) link.setAttribute('aria-current', 'location');
+          else link.removeAttribute('aria-current');
+        });
+      };
+      let scheduled = false;
+      window.addEventListener('scroll', () => {
+        if (scheduled) return;
+        scheduled = true;
+        window.requestAnimationFrame(() => { updateActiveLink(); scheduled = false; });
+      }, { passive: true });
+      updateActiveLink();
+    })();
+  </script>
+{% endblock %}

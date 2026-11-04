@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}
+  Log in
+{% endblock %}
+{% block content %}
+  <div class="login-layout">
+    <aside class="login-brand-panel" aria-labelledby="login-brand-heading">
+      <h2 id="login-brand-heading">Find and join events on campus</h2>
+      <p>Discover campus activities and keep your event plans together in one place.</p>
+      <ul>
+        <li>
+          <svg class="login-feature-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="m5 12.5 4.2 4.2L19 7"></path>
+          </svg>
+          <span>Browse events</span>
+        </li>
+        <li>
+          <svg class="login-feature-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="m5 12.5 4.2 4.2L19 7"></path>
+          </svg>
+          <span>Register in one click</span>
+        </li>
+        <li>
+          <svg class="login-feature-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="m5 12.5 4.2 4.2L19 7"></path>
+          </svg>
+          <span>Track your dashboard</span>
+        </li>
+      </ul>
+    </aside>
+    <section class="card login-card">
+      <h1>Welcome back!</h1>
+      <p class="login-intro">Log in to continue. New accounts must verify their email before signing in.</p>
+      {% if session.get('pending_registration_id') or session.get('pending_email_verification_user_id') %}
+        <form method="post" action="{{ url_for('resend_verification_email') }}" class="login-resend-form">
+          <button class="login-resend" type="submit">Didn't get a verification email? Resend</button>
+        </form>
+      {% endif %}
+      <form id="login-form" method="post" class="stack">
+        <label for="login-email">Email
+          <input id="login-email" type="email" name="email" required autocomplete="email" autofocus placeholder="Enter your email address">
+        </label>
+        <label for="login-password">Password
+          <span class="password-field">
+            <input id="login-password" type="password" name="password" required autocomplete="current-password" placeholder="Enter your password">
+            <button class="password-toggle" type="button" aria-label="Show password" aria-pressed="false" aria-controls="login-password" title="Show password">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"></path>
+                <circle cx="12" cy="12" r="2.7"></circle>
+                <path class="eye-slash" d="m4 4 16 16"></path>
+              </svg>
+            </button>
+          </span>
+        </label>
+        <button class="login-submit" type="submit">Log in</button>
+      </form>
+      <p class="foot">New here? <a href="{{ url_for('register') }}">Create an account</a></p>
+    </section>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/login.js') }}" defer>
+  </script>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}
+  {% if meeting %}
+    Edit
+  {% else %}
+    Schedule
+  {% endif %}
+   meeting
+{% endblock %}
+{% block content %}
+  <section class="welcome meeting-form-intro">
+    <p class="eyebrow">{{ event.event_name }}</p>
+    <h1>
+      {% if meeting %}
+        Edit meeting
+      {% else %}
+        Schedule a meeting
+      {% endif %}
+    </h1>
+    <p>The external meeting link is provided by your meeting service.</p>
+  </section>
+  <form method="post" class="card wide stack meeting-form convener-section-card">
+    <label class="event-field event-field-full">Program (optional)<select name="program_id">
+        <option value="">Event-level meeting</option>
+        {% for program in programs %}
+          <option value="{{ program.id }}" {% if meeting and meeting.program_id == program.id %}selected{% endif %}>{{ program.program_name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="event-field event-field-full">Meeting title<input name="title" maxlength="160" required value="{{ meeting.title if meeting else '' }}">
+    </label>
+    <label class="event-field event-field-full">Agenda / description<textarea name="description" rows="4" maxlength="4000">{{ meeting.description if meeting else '' }}</textarea>
+    </label>
+    <div class="form-row">
+      <label class="event-field">Date<input type="date" name="meeting_date" required value="{{ meeting.meeting_date if meeting else '' }}">
+      </label>
+      <label class="event-field">Start time<input type="time" name="start_time" required value="{{ meeting.start_time if meeting else '' }}">
+      </label>
+      <label class="event-field">End time<input type="time" name="end_time" required value="{{ meeting.end_time if meeting else '' }}">
+      </label>
+    </div>
+    <label class="event-field event-field-full">External meeting link<input type="url" name="meeting_link" required placeholder="https://meet.google.com/..." value="{{ meeting.meeting_link if meeting else '' }}">
+    </label>
+    <fieldset class="meeting-recipient-fieldset">
+      <legend>Internal event groups</legend>
+      {% if recipient_groups %}
+        <div class="meeting-select-list">
+          {% for group in recipient_groups %}
+            <label>
+              <input type="checkbox" name="internal_group_types" value="{{ group.group_type }}" {% if group.group_type in selected_group_types %}checked{% endif %}>
+              <span>{{ group.label }} <small>{{ group.member_count }} member(s)</small></span>
+            </label>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="empty-state">No internal groups are assigned to this event yet.</p>
+      {% endif %}
+    </fieldset>
+    <fieldset class="meeting-recipient-fieldset">
+      <legend>Event management teams (optional)</legend>
+      {% if event_teams %}
+        <div class="meeting-select-list">
+          {% for team in event_teams %}
+            <label>
+              <input type="checkbox" name="event_team_ids" value="{{ team.id }}" {% if team.id in selected_event_teams %}checked{% endif %}>
+              <span>{{ team.team_name }} <small>{{ team.member_count }} member(s) · Team Leader: {{ team.team_leader_name }}</small></span>
+            </label>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="empty-state">No event management teams have been created for this event.</p>
+      {% endif %}
+    </fieldset>
+    <div class="inline-actions">
+      <button class="convener-button convener-button-primary" type="submit">
+        {% if meeting %}
+          Save meeting
+        {% else %}
+          Create meeting
+        {% endif %}
+      </button>
+      <a class="button secondary convener-button convener-button-secondary" href="{{ url_for('event_meetings', event_id=event.id) }}">Cancel</a>
+    </div>
+  </form>
+{% endblock %}

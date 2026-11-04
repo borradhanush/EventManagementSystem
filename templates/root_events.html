@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}
+  Approved Events
+{% endblock %}
+{% block content %}
+  <div class="root-approved-events-page">
+    <section class="welcome">
+      <p class="eyebrow">ROOT OVERVIEW</p>
+      <div class="root-approved-events-title">
+        <h1>Approved events</h1>
+        <span class="root-approved-events-count" aria-label="{{ events|length }} approved events">{{ events|length }}</span>
+      </div>
+      <p>High-level event details and Primary Convener assignments.</p>
+    </section>
+    {% if events %}
+      <section class="card wide root-approved-events-card">
+        <div class="table-wrap">
+          <table class="root-approved-events-table">
+            <thead>
+              <tr>
+                <th>Event</th>
+                <th>Organization</th>
+                <th>Type</th>
+                <th>Dates</th>
+                <th>Status</th>
+                <th>Visibility</th>
+                <th>Primary Convener</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for event in events %}
+                <tr>
+                  <td class="root-approved-event-name">{{ event.event_name }}</td>
+                  <td>{{ event.organization_university }}</td>
+                  <td>{{ event.event_type }}</td>
+                  <td>
+                    {% set month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] %}
+                    {% set start_label = (event.start_date[8:10]|int)|string ~ ' ' ~ month_names[event.start_date[5:7]|int - 1] ~ ' ' ~ event.start_date[:4] %}
+                    {% set end_label = (event.end_date[8:10]|int)|string ~ ' ' ~ month_names[event.end_date[5:7]|int - 1] ~ ' ' ~ event.end_date[:4] %}
+                    {{ start_label }}{% if event.start_date != event.end_date %} – {{ end_label }}{% endif %}
+                  </td>
+                  <td><span class="dashboard-badge dashboard-badge--{{ 'blue' if event.status == 'UPCOMING' else 'success' if event.status == 'ONGOING' else 'neutral' }}">{{ event.status|title }}</span></td>
+                  <td><span class="dashboard-badge dashboard-badge--{{ 'success' if event.visibility == 'PUBLIC' else 'neutral' }}">{{ event.visibility|title }}</span></td>
+                  <td>{{ event.primary_convener }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    {% else %}
+      <p class="empty-state">No approved events yet.</p>
+    {% endif %}
+  </div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}
+  QR pass · {{ registration.program_name }}
+{% endblock %}
+{% block content %}
+  <section class="welcome">
+    <p class="eyebrow">PARTICIPANT PASS · {{ pass_status }}</p>
+    <h1>{{ registration.program_name }}</h1>
+    <p>{{ registration.event_name }}</p>
+  </section>
+  <section class="card wide qr-pass-card">
+    {% if qr_pass %}
+      <div class="qr-pass-details">
+        <dl class="registration-details">
+          <dt>Participant</dt>
+          <dd>{{ registration.full_name }}</dd>
+          <dt>Event</dt>
+          <dd>{{ registration.event_name }}</dd>
+          <dt>Program</dt>
+          <dd>{{ registration.program_name }}</dd>
+          <dt>Pass/reference number</dt>
+          <dd>{{ qr_pass.pass_number }}</dd>
+          <dt>Status</dt>
+          <dd>
+            <strong>{{ pass_status }}</strong>
+          </dd>
+          <dt>Created</dt>
+          <dd>{{ qr_pass.created_at }}</dd>
+        </dl>
+        <p>This QR contains only a random opaque pass token. Keep it private.</p>
+      </div>
+      <img class="qr-pass-image" src="data:image/png;base64,{{ pass_png }}" alt="Scannable QR pass for {{ registration.program_name }}">
+      {% if pass_status == 'ACTIVE' %}
+        <form method="post" action="{{ url_for('revoke_participant_qr_pass', pass_id=qr_pass.id) }}" onsubmit="return confirm('Revoke this QR pass? It will no longer validate.')">
+          <button class="danger" type="submit">Revoke pass</button>
+        </form>
+      {% endif %}
+    {% else %}
+      <p>
+        {% if revoked_pass %}
+          Previous pass {{ revoked_pass.pass_number }} was revoked. Generate a replacement if needed.
+        {% else %}
+          No active QR pass exists for this registration.
+        {% endif %}
+      </p>
+      <p>The pass token will be random and will not contain your profile or face data.</p>
+      <form method="post" action="{{ url_for('create_participant_qr_pass', registration_id=registration.id) }}">
+        <button type="submit">Generate QR pass</button>
+      </form>
+    {% endif %}
+    <p class="foot">
+      <a href="{{ url_for('participant_registration_detail', registration_id=registration.id) }}">Back to registration</a>
+    </p>
+  </section>
+{% endblock %}

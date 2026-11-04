@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}
+  Root event review
+{% endblock %}
+{% block content %}
+  <section class="welcome">
+    <p class="eyebrow">ROOT ADMINISTRATION</p>
+    <h1>Event request review</h1>
+    <p>Review each proposal and approve or reject it. Approved requests remain request records for the next event-management phase.</p>
+  </section>
+  {% if event_requests %}
+    <div class="request-list">
+      {% for item in event_requests %}
+        <article class="card request-card">
+          <div class="request-card-top">
+            <div>
+              <p class="eyebrow">REQUEST #{{ item.id }} · {{ item.requested_at }}</p>
+              <h2>{{ item.event_title }}</h2>
+            </div>
+            <span class="status {{ item.status }}">{{ item.status|title }}</span>
+          </div>
+          <div class="request-meta">
+            <p>
+              <strong>Requested by</strong><br>{{ item.requester_name }} · {{ item.requester_email }}
+              {% if item.requester_institution %}
+                <br>{{ item.requester_institution }}
+              {% endif %}
+            </p>
+            <p>
+              <strong>Proposed date</strong><br>{{ item.proposed_date }}</p>
+            <p>
+              <strong>Venue</strong><br>{{ item.venue }}</p>
+          </div>
+          <div class="request-description">
+            <strong>Purpose and details</strong>
+            <p>{{ item.description }}</p>
+          </div>
+          {% if item.status == 'pending' %}
+            {% if item.root_note %}
+              <div class="previous-note">
+                <strong>Previous Root note</strong>
+                <p>{{ item.root_note }}</p>
+              </div>
+            {% endif %}
+            <form method="post" action="{{ url_for('review_event_request', request_id=item.id) }}" class="review-form">
+              <label>Review note (optional)<textarea name="root_note" rows="2" maxlength="1000" placeholder="Add a short note for the requester">
+                </textarea>
+              </label>
+              <div class="form-actions">
+                <button name="decision" value="rejected" class="danger">Reject request</button>
+                <button name="decision" value="approved">Approve request</button>
+              </div>
+            </form>
+          {% else %}
+            <div class="reviewed-note">
+              <strong>Latest Root note</strong>
+              <p>{{ item.root_note or 'No note provided.' }}</p>
+              <span class="muted">Reviewed {{ item.reviewed_at }}</span>
+            </div>
+          {% endif %}
+          {% set history = history_by_request.get(item.id, []) %}
+          {% if history %}
+            <details class="request-history">
+              <summary>Request and review history ({{ history|length }})</summary>
+              {% for entry in history %}
+                <article>
+                  <strong>{{ entry.action|title }}</strong><span class="muted"> · {{ entry.occurred_at }}</span>
+                  <p>{{ entry.event_title }} — {{ entry.proposed_date }} at {{ entry.venue }}</p>
+                  {% if entry.root_note %}
+                    <p>
+                      <strong>Root note:</strong>{{ entry.root_note }}</p>
+                  {% endif %}
+                  <p>{{ entry.description }}</p>
+                </article>
+              {% endfor %}
+            </details>
+          {% endif %}
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <section class="card empty-state">There are no event requests to review yet.</section>
+  {% endif %}
+{% endblock %}

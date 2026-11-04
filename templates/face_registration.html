@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}
+  Face registration
+{% endblock %}
+{% block content %}
+  <section class="face-page" data-face-mode="register">
+    <header class="profile-page-heading face-page-heading">
+      <a class="profile-back-link" href="{{ url_for('profile') }}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M19 12H5m7 7-7-7 7-7"></path>
+        </svg>
+        Back to profile
+      </a>
+      <div class="face-heading-row">
+        <h1>Register your face</h1>
+        {% if user.face_embedding %}
+          <span class="profile-face-badge profile-face-badge--registered">Registered</span>
+        {% else %}
+          <span class="profile-face-badge profile-face-badge--pending">Not registered</span>
+        {% endif %}
+      </div>
+      <p>Use a clear, front-facing photo with only you in frame.</p>
+      <p class="face-technical-note">The server saves a face embedding from exactly one detected face.</p>
+    </header>
+    {% if user.face_embedding %}
+      <div class="notice success face-registration-success" role="status">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="m8 12 2.5 2.5L16 9"></path>
+        </svg>
+        <span>A 128-dimensional face embedding is registered for this account.</span>
+      </div>
+    {% endif %}
+    <div class="face-grid face-registration-layout">
+      <section class="card face-tips-card" aria-labelledby="face-tips-heading">
+        <h2 id="face-tips-heading">Tips for a good capture</h2>
+        <ul class="verification-steps face-tips-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3"></circle><path d="M5 20a7 7 0 0 1 14 0"></path></svg><span>Face the camera directly</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"></path></svg><span>Use even, bright lighting</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3"></circle><path d="M5 20a7 7 0 0 1 14 0"></path></svg><span>Only you in frame</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9 9l6 6m0-6-6 6"></path></svg><span>No mask, hat or heavy shadows</span></li>
+        </ul>
+      </section>
+      <form method="post" enctype="multipart/form-data" class="card stack face-upload-form">
+        <h2>Upload an image instead</h2>
+        <p class="muted">JPG or PNG. Upload remains available if you cannot use a camera.</p>
+        <label class="face-file-drop" for="face-image">Choose an image<input id="face-image" type="file" name="image" accept="image/jpeg,image/png" required>
+        </label>
+        <button class="face-upload-button" type="submit">Generate embedding and register</button>
+      </form>
+      <section class="card camera-panel face-camera-card" aria-labelledby="camera-heading">
+        <h2 id="camera-heading">Capture with camera</h2>
+        <label for="camera-select">Camera</label>
+        <select id="camera-select" disabled aria-describedby="camera-status">
+          <option>Checking available cameras…</option>
+        </select>
+        <div class="face-video-frame">
+          <video id="camera" autoplay muted playsinline aria-label="Live camera preview">
+          </video>
+          <span class="face-guide-overlay" aria-hidden="true"></span>
+        </div>
+        <canvas id="snapshot" hidden>
+        </canvas>
+        <div class="inline-actions">
+          <button type="button" id="take-photo" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <path d="M4 8h3l1.5-2h7L17 8h3v11H4z"></path>
+              <circle cx="12" cy="13" r="3.5"></circle>
+            </svg>
+            Capture and register
+          </button>
+        </div>
+        <p id="camera-status" class="camera-status" role="status" aria-live="polite">Requesting camera access…</p>
+      </section>
+    </div>
+    <div id="verification-result" aria-live="polite"></div>
+  </section>
+{% endblock %}
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/camera_selection.js') }}" defer>
+  </script>
+{% endblock %}

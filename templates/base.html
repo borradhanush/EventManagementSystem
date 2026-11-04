@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+      {% block title %}
+        Event Management
+      {% endblock %}
+    </title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/teams.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/programs.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/participants.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/gate.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/accommodation.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/meetings.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/analytics.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/participant_dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <header class="site-header site-nav">
+      <div class="site-nav-inner">
+      <a class="brand" href="{{ url_for('index') }}">
+        <svg class="site-brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <rect x="3" y="5" width="18" height="16" rx="2"></rect>
+          <path d="M16 3v4M8 3v4M3 10h18"></path>
+        </svg>
+        <span>Campus Events</span>
+      </a>
+      <button class="convener-menu-toggle site-nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-navigation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+      </button>
+      <nav class="site-nav-links" id="site-navigation" aria-label="Main navigation">
+        <a href="{{ url_for('public_events') }}"{% if request.endpoint in ('public_events', 'public_event_detail') %} aria-current="page"{% endif %}>Events</a>
+        {% if session.get('user_id') %}
+          <a href="{{ url_for('dashboard') }}"{% if request.endpoint in ('dashboard', 'convener_event_dashboard', 'event_meetings', 'create_meeting', 'edit_meeting') %} aria-current="page"{% endif %}>Dashboard</a>
+          {% if session.get('role') == 'root' %}
+            <a href="{{ url_for('root_event_requests') }}" aria-label="Root review"{% if request.endpoint == 'root_event_requests' %} aria-current="page"{% endif %}>Request review</a>
+            <a href="{{ url_for('root_events') }}"{% if request.endpoint == 'root_events' %} aria-current="page"{% endif %}>Approved events</a>
+            <a href="{{ url_for('root_analytics') }}"{% if request.endpoint == 'root_analytics' %} aria-current="page"{% endif %}>Analytics</a>
+          {% else %}
+            <a href="{{ url_for('new_event_request') }}"{% if request.endpoint == 'new_event_request' %} aria-current="page"{% endif %}>Request event</a>
+            <a href="{{ url_for('profile') }}"{% if request.endpoint == 'profile' %} aria-current="page"{% endif %}>Profile</a>
+          {% endif %}
+          <form class="nav-logout" method="post" action="{{ url_for('logout') }}">
+            <button class="link-button" type="submit">Log out</button>
+          </form>
+        {% else %}
+          <a href="{{ url_for('login') }}"{% if request.endpoint == 'login' %} aria-current="page"{% endif %}>Log in</a>
+          <a class="nav-action" href="{{ url_for('register') }}"{% if request.endpoint == 'register' %} aria-current="page"{% endif %}>Create account</a>
+        {% endif %}
+      </nav>
+      </div>
+    </header>
+    <main id="main-content" tabindex="-1"{% if request.endpoint == 'dashboard' %} class="dashboard-page"{% elif request.endpoint == 'profile' %} class="profile-page"{% elif request.endpoint == 'participant_registration_detail' %} class="participant-registration-detail-page"{% elif request.endpoint in ('register_for_program', 'edit_participant_registration') %} class="profile-page participant-registration-form-page"{% elif request.endpoint == 'new_event_request' %} class="event-request-new-page"{% elif request.endpoint == 'face_registration' %} class="face-workflow-page face-registration-page"{% elif request.endpoint == 'face_verification' %} class="face-workflow-page face-verification-page"{% elif request.endpoint in ('convener_event_dashboard', 'event_meetings', 'create_meeting', 'edit_meeting') %} class="convener-event-dashboard-page{% if request.endpoint in ('event_meetings', 'create_meeting', 'edit_meeting') %} event-meetings-page{% endif %}"{% elif request.endpoint == 'gate_program' %} class="gate-page-shell"{% elif request.endpoint == 'accommodation_event' %} class="dashboard-page accommodation-event-page"{% endif %}>
+      {% if request.endpoint != 'accommodation_event' %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% for category, message in messages %}
+            {% if request.endpoint == 'mock_payment' %}
+              <div class="notice {{ category }} mock-payment-flash" role="{{ 'alert' if category == 'error' else 'status' }}">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  {% if category == 'success' %}<path d="m5 12 4 4L19 6"/>{% else %}<circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/>{% endif %}
+                </svg>
+                <span>{{ message }}</span>
+                <button class="mock-payment-flash-dismiss" type="button" aria-label="Dismiss message">×</button>
+              </div>
+            {% else %}
+              <div class="notice {{ category }}" role="{{ 'alert' if category == 'error' else 'status' }}">{{ message }}</div>
+            {% endif %}
+          {% endfor %}
+        {% endwith %}
+      {% endif %}
+      {% block content %}
+      {% endblock %}
+    </main>
+    {% block scripts %}
+    {% endblock %}
+    <script>
+      (() => {
+        const header = document.querySelector('.site-nav');
+        const button = header?.querySelector('.site-nav-toggle');
+        const navigation = document.getElementById('site-navigation');
+        if (!header || !button || !navigation) return;
+        const closeMenu = () => {
+          navigation.classList.remove('is-open');
+          button.setAttribute('aria-expanded', 'false');
+          button.setAttribute('aria-label', 'Open menu');
+        };
+        if (!document.querySelector('.convener-event-dashboard-page:not(.event-meetings-page)')) {
+          button.addEventListener('click', () => {
+            const expanded = button.getAttribute('aria-expanded') === 'true';
+            button.setAttribute('aria-expanded', String(!expanded));
+            button.setAttribute('aria-label', expanded ? 'Open menu' : 'Close menu');
+            navigation.classList.toggle('is-open', !expanded);
+          });
+          navigation.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
+          navigation.querySelectorAll('button').forEach(link => link.addEventListener('click', closeMenu));
+          document.addEventListener('keydown', event => { if (event.key === 'Escape') closeMenu(); });
+        }
+        document.addEventListener('click', event => {
+          if (button.getAttribute('aria-expanded') === 'true' && !header.contains(event.target)) closeMenu();
+        });
+        const updateScrollState = () => header.classList.toggle('is-scrolled', window.scrollY > 0);
+        updateScrollState();
+        window.addEventListener('scroll', updateScrollState, { passive: true });
+      })();
+    </script>
+  </body>
+</html>

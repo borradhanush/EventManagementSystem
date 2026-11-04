@@ -1,0 +1,15 @@
+.env
+.env.*
+__pycache__/
+*.py[cod]
+*.tmp
+*.log
+
+# Local application data and uploaded user content
+database/*.db
+database/*.db-shm
+database/*.db-wal
+static/faces/*
+!static/faces/.gitkeep
+static/uploads/*
+!static/uploads/.gitkeep

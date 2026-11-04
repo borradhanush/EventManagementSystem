@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% block title %}{{ event.event_name }}{% endblock %}
+{% block content %}
+{% macro date_label(raw) -%}
+  {% if not raw %}—{% else %}
+    {% set value = raw|string %}
+    {% set months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] %}
+    {{ value[8:10]|int }} {{ months[value[5:7]|int - 1] }} {{ value[:4] }}
+  {% endif %}
+{%- endmacro %}
+{% macro event_date_range(start, end) -%}
+  {% if not start or not end %}—{% elif (start|string) == (end|string) %}{{ date_label(start) }}{% else %}
+    {% set start_value = start|string %}{% set end_value = end|string %}
+    {% set months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] %}
+    {% if start_value[:4] == end_value[:4] %}
+      {{ start_value[8:10]|int }} {{ months[start_value[5:7]|int - 1] }} <wbr>–<wbr> {{ end_value[8:10]|int }} {{ months[end_value[5:7]|int - 1] }} {{ end_value[:4] }}
+    {% else %}
+      {{ date_label(start) }} <wbr>–<wbr> {{ date_label(end) }}
+    {% endif %}
+  {% endif %}
+{%- endmacro %}
+{% macro program_datetime_range(start, end) -%}
+  {% if not start or not end %}—{% else %}
+    {% set start_value = start|string %}{% set end_value = end|string %}
+    {% set months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] %}
+    {% set start_hour = start_value[11:13]|int %}{% set end_hour = end_value[11:13]|int %}
+    {% set start_time = ((start_hour % 12) or 12)|string ~ ':' ~ start_value[14:16] ~ ' ' ~ ('AM' if start_hour < 12 else 'PM') %}
+    {% set end_time = ((end_hour % 12) or 12)|string ~ ':' ~ end_value[14:16] ~ ' ' ~ ('AM' if end_hour < 12 else 'PM') %}
+    {% if start_value[:4] == end_value[:4] %}
+      {{ start_value[8:10]|int }} {{ months[start_value[5:7]|int - 1] }}, {{ start_time }} <wbr>–<wbr> {{ end_value[8:10]|int }} {{ months[end_value[5:7]|int - 1] }} {{ end_value[:4] }}, {{ end_time }}
+    {% else %}
+      {{ date_label(start) }}, {{ start_time }} <wbr>–<wbr> {{ date_label(end) }}, {{ end_time }}
+    {% endif %}
+  {% endif %}
+{%- endmacro %}
+{% macro datetime_date(raw) -%}
+  {% if not raw %}—{% else %}
+    {% set value = raw|string %}
+    {% set months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] %}
+    {{ value[8:10]|int }} {{ months[value[5:7]|int - 1] }} {{ value[:4] }}
+  {% endif %}
+{%- endmacro %}
+{% set event_status = event.status|string|upper %}
+{% if event_status == 'UPCOMING' %}{% set event_tone = 'info' %}
+{% elif event_status == 'ONGOING' %}{% set event_tone = 'success' %}
+{% elif event_status == 'COMPLETED' %}{% set event_tone = 'neutral' %}
+{% elif event_status == 'CANCELLED' %}{% set event_tone = 'danger' %}
+{% else %}{% set event_tone = 'neutral' %}{% endif %}
+<div class="event-detail-page">
+  <header class="event-detail-hero">
+    <nav class="event-detail-breadcrumb" aria-label="Breadcrumb">
+      <a href="{{ url_for('public_events') }}">Events</a>
+      <span aria-hidden="true">›</span>
+      <span aria-current="page">{{ event.event_name }}</span>
+    </nav>
+    <div class="event-detail-hero-main">
+      <div class="event-detail-heading">
+        <p class="event-detail-original-eyebrow visually-hidden">{{ event.event_type }} · {{ event.status }}</p>
+        <div class="event-detail-title-row">
+          <h1>{{ event.event_name }}</h1>
+          <span class="ui-badge ui-badge--{{ event_tone }}">{{ event.status|title }}</span>
+          <span class="event-detail-type-pill">{{ event.event_type|title }}</span>
+        </div>
+        <div class="event-detail-info-row">
+          <span class="event-detail-info-chip">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M9 9h.01M15 9h.01"/></svg>
+            {{ event.organization_university }}
+          </span>
+          <span class="event-detail-info-chip">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>
+            {{ event_date_range(event.start_date, event.end_date) }}
+          </span>
+          <span class="event-detail-info-chip">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+            {{ event.venue }}
+          </span>
+        </div>
+      </div>
+      <a class="ui-btn ui-btn--secondary event-detail-back" href="{{ url_for('public_events') }}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m7 7-7-7 7-7"/></svg>
+        Back to public events
+      </a>
+    </div>
+  </header>
+
+  <section class="card ui-card event-detail-about" style="--event-stagger:0;">
+    <header class="event-detail-section-heading">
+      <span class="event-detail-icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h8l5 5v13H6z"/><path d="M14 3v6h5M9 13h7M9 17h7"/></svg></span>
+      <h2>About this event</h2>
+    </header>
+    {% if event.description %}
+      <p class="event-detail-description">{{ event.description }}</p>
+    {% else %}
+      <p class="event-detail-description is-empty"></p>
+    {% endif %}
+  </section>
+
+  <section class="event-detail-programs" aria-labelledby="event-programs-heading">
+    <header class="event-detail-section-heading event-detail-programs-heading">
+      <span class="event-detail-icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></span>
+      <h2 id="event-programs-heading">Programs</h2>
+      <span class="event-detail-count">{{ programs|length }}</span>
+    </header>
+    {% if programs %}
+      <div class="event-detail-program-grid{% if programs|length == 1 %} has-single{% endif %}">
+        {% for program in programs %}
+          {% set program_status = program.status|string|upper %}
+          {% if program_status == 'UPCOMING' %}{% set program_tone = 'info' %}
+          {% elif program_status == 'ONGOING' %}{% set program_tone = 'success' %}
+          {% elif program_status == 'COMPLETED' %}{% set program_tone = 'neutral' %}
+          {% elif program_status == 'CANCELLED' %}{% set program_tone = 'danger' %}
+          {% else %}{% set program_tone = 'neutral' %}{% endif %}
+          <article class="event-detail-program-card" style="--event-stagger:{{ loop.index0 + 1 }};">
+            <div class="event-detail-program-topline">
+              <span class="event-detail-category-pill">{{ program.category|title }}</span>
+              <span class="event-detail-mode-pill">{{ program.participation_mode|title }}</span>
+              <span class="ui-badge ui-badge--{{ program_tone }}">{{ program.status|title }}</span>
+            </div>
+            <h3><a href="{{ url_for('program_detail', program_id=program.id) }}">{{ program.program_name }}</a></h3>
+            <div class="event-detail-program-meta">
+              <p><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg><span>{{ program_datetime_range(program.start_at, program.end_at) }}</span></p>
+              <p><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>{{ program.venue }}</span></p>
+              <p><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Register by {{ datetime_date(program.registration_deadline) }}</span></p>
+            </div>
+            <footer class="event-detail-program-footer">
+              <a class="ui-btn ui-btn--secondary" href="{{ url_for('program_detail', program_id=program.id) }}">
+                View program
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
+              </a>
+            </footer>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="event-detail-empty-state">
+        <span class="event-detail-empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></span>
+        <p>No programs are listed for this event.</p>
+      </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

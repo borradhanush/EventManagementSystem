@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block title %}Mock payment receipt{% endblock %}
+{% block content %}
+{% macro formatted_datetime(raw) -%}
+  {% if not raw %}
+    —
+  {% else %}
+    {% set raw_date = raw|string %}
+    {% set month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] %}
+    {{ raw_date[8:10]|int }} {{ month_names[raw_date[5:7]|int - 1] }} {{ raw_date[:4] }}{% if raw_date|length >= 16 %}{% set hour = raw_date[11:13]|int %}, {{ (hour % 12) or 12 }}:{{ raw_date[14:16] }} {{ 'AM' if hour < 12 else 'PM' }}{% endif %}
+  {% endif %}
+{%- endmacro %}
+{% set status = payment.status|string|upper %}
+{% if status == 'SUCCESS' %}
+  {% set status_tone = 'success' %}
+  {% set status_heading = 'Payment successful' %}
+{% elif status == 'FAILED' %}
+  {% set status_tone = 'danger' %}
+  {% set status_heading = 'Payment failed' %}
+{% elif status == 'PENDING' %}
+  {% set status_tone = 'warning' %}
+  {% set status_heading = 'Payment pending' %}
+{% else %}
+  {% set status_tone = 'neutral' %}
+  {% set status_heading = 'Payment ' ~ (payment.status|string|title) %}
+{% endif %}
+<div class="payment-receipt-page">
+  <div class="receipt-page-top">
+    <nav class="receipt-breadcrumb" aria-label="Breadcrumb">
+      <a href="{{ url_for('participant_registration_detail', registration_id=payment.registration_id) }}">Registrations</a>
+      <span aria-hidden="true">›</span>
+      <span aria-current="page">Receipt</span>
+    </nav>
+    <a class="ui-btn ui-btn--secondary receipt-back-link" href="{{ url_for('participant_registration_detail', registration_id=payment.registration_id) }}">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m7 7-7-7 7-7"/></svg>
+      Back to registration
+    </a>
+  </div>
+  <section class="card ui-card payment-receipt-card" aria-labelledby="receipt-status-heading">
+    <div class="receipt-status-banner is-{{ status_tone }}" role="status">
+      <span class="receipt-status-icon" aria-hidden="true">
+        {% if status == 'SUCCESS' %}
+          <svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg>
+        {% elif status == 'FAILED' %}
+          <svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        {% elif status == 'PENDING' %}
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        {% else %}
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg>
+        {% endif %}
+      </span>
+      <div class="receipt-status-copy">
+        <div class="receipt-status-title-row">
+          <h1 id="receipt-status-heading">{{ status_heading }}</h1>
+          <span class="ui-badge ui-badge--{{ status_tone }}">{{ payment.status|string|title }}</span>
+        </div>
+        <p>{{ payment.event_name or '—' }}{% if payment.program_name %} · {{ payment.program_name }}{% endif %}</p>
+        <div class="receipt-amount-row">
+          <strong class="{% if payment.amount_cents == 0 %}is-zero{% endif %}">₹{{ '{:,.2f}'.format(payment.amount_cents / 100) }}</strong>
+          <span class="ui-badge ui-badge--warning receipt-simulated-badge">Simulated</span>
+        </div>
+      </div>
+    </div>
+    <div class="receipt-card-content">
+      <dl class="registration-details receipt-details">
+        <dt>Receipt / reference</dt>
+        <dd><code class="receipt-reference">{{ payment.receipt_number or '—' }}</code></dd>
+        <dt>Participant</dt>
+        <dd>{{ payment.full_name or '—' }}</dd>
+        <dt>Event</dt>
+        <dd>{{ payment.event_name or '—' }}</dd>
+        <dt>Program</dt>
+        <dd>{{ payment.program_name or '—' }}</dd>
+        <dt>Amount</dt>
+        <dd><span class="receipt-detail-amount {% if payment.amount_cents == 0 %}is-zero{% endif %}">₹{{ '{:,.2f}'.format(payment.amount_cents / 100) }}</span><span class="ui-badge ui-badge--warning receipt-simulated-badge">Simulated</span></dd>
+        <dt>Payment status</dt>
+        <dd><span class="ui-badge ui-badge--{{ status_tone }}">{{ payment.status|string|title }}</span></dd>
+        <dt>Date / time</dt>
+        <dd>{{ formatted_datetime(payment.processed_at or payment.created_at) }}</dd>
+      </dl>
+      <p class="mock-payment-warning receipt-simulated-warning">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg>
+        <span>This receipt records a simulated payment only. No real financial transaction occurred.</span>
+      </p>
+    </div>
+    <footer class="receipt-actions">
+      <button class="ui-btn ui-btn--secondary receipt-print-button" type="button" onclick="window.print()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8V3h10v5M7 17H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M7 14h10v7H7zM17 11h.01"/></svg>
+        Print receipt
+      </button>
+      {% if payment.status == 'SUCCESS' %}
+        <a class="ui-btn ui-btn--primary receipt-action-link" href="{{ url_for('participant_qr_pass', registration_id=payment.registration_id) }}">View or generate QR pass</a>
+      {% elif payment.status == 'FAILED' and payment.program_status != 'CANCELLED' %}
+        <a class="ui-btn ui-btn--primary receipt-action-link" href="{{ url_for('participant_payment', registration_id=payment.registration_id) }}">Try mock payment again</a>
+      {% endif %}
+    </footer>
+  </section>
+</div>
+{% endblock %}

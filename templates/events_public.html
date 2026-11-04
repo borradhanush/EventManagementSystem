@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}
+  Public Events
+{% endblock %}
+{% block content %}
+  <div class="public-events-page">
+    <section class="welcome">
+      <p class="eyebrow">CAMPUS EVENTS</p>
+      <h1>Public events</h1>
+      <p>Browse events shared publicly by their conveners.</p>
+    </section>
+    {% if events %}
+      <section class="event-grid">
+        {% for event in events %}
+          <article class="card event-card">
+            <div class="public-event-label-line">
+              <span class="public-event-type">{{ event.event_type }}</span>
+              <span class="dashboard-badge dashboard-badge--{{ 'blue' if event.status == 'UPCOMING' else 'success' if event.status == 'ONGOING' else 'neutral' }}">{{ event.status|title }}</span>
+            </div>
+            <h2><a href="{{ url_for('public_event_detail', event_id=event.id) }}">{{ event.event_name }}</a></h2>
+            <div class="public-event-meta">
+              <p><svg class="public-event-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M9 9h.01M15 9h.01"/></svg><span>{{ event.organization_university }}</span></p>
+              {% set month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] %}
+              {% set start_label = (event.start_date[8:10]|int)|string ~ ' ' ~ month_names[event.start_date[5:7]|int - 1] ~ ' ' ~ event.start_date[:4] %}
+              {% set end_label = (event.end_date[8:10]|int)|string ~ ' ' ~ month_names[event.end_date[5:7]|int - 1] ~ ' ' ~ event.end_date[:4] %}
+              <p><svg class="public-event-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg><span>{{ start_label }}{% if event.start_date != event.end_date %} – {{ end_label }}{% endif %}</span></p>
+              <p><svg class="public-event-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>{{ event.venue }}</span></p>
+            </div>
+            <a class="public-event-details-link" href="{{ url_for('public_event_detail', event_id=event.id) }}">View details</a>
+          </article>
+        {% endfor %}
+      </section>
+    {% else %}
+      <p class="empty-state">There are no public events right now.</p>
+    {% endif %}
+  </div>
+{% endblock %}

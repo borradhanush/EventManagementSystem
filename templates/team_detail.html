@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}
+  {{ team.team_name }}
+{% endblock %}
+{% block content %}
+  <section class="welcome">
+    <p class="eyebrow">EVENT TEAM · {{ team.event_name }}</p>
+    <h1>{{ team.team_name }}</h1>
+    <p>{{ team.description or 'No team description provided.' }}</p>
+  </section>
+  <section class="card wide">
+    <p>
+      <strong>Team Leader:</strong>{{ leader.full_name }} ({{ leader.email }})</p>
+    <h2>Members</h2>
+    {% if members %}
+      <ul class="team-member-list">
+        {% for member in members %}
+          <li>
+            <span><strong>{{ member.full_name }}</strong> · {{ member.email }}</span>
+            {% if can_manage %}
+              <form method="post" action="{{ url_for('remove_team_member', team_id=team.id, member_id=member.id) }}">
+                <button class="danger" type="submit">Remove</button>
+              </form>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty-state">No members have joined this team yet.</p>
+    {% endif %}
+    {% if can_manage %}
+      <section class="team-create-form">
+        <h2>Add a member</h2>
+        <p>Enter the email address of an existing registered user.</p>
+        <form method="post" action="{{ url_for('add_team_member', team_id=team.id) }}">
+          <label>Registered user's email<input type="email" name="email" required>
+          </label>
+          <button type="submit">Add member</button>
+        </form>
+      </section>
+    {% endif %}
+    {% if team.is_member %}
+      <form method="post" action="{{ url_for('leave_team', team_id=team.id) }}" class="leave-team-form">
+        <button class="secondary" type="submit">Leave this team</button>
+      </form>
+    {% endif %}
+    <p class="foot">
+      <a href="{{ url_for('dashboard') }}">Back to dashboard</a>
+    </p>
+  </section>
+{% endblock %}
